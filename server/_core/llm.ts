@@ -1,4 +1,3 @@
-
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
 export type TextContent = {
@@ -51,6 +50,19 @@ export type ToolChoiceExplicit = {
 
 export type ToolChoice = ToolChoicePrimitive | ToolChoiceByName | ToolChoiceExplicit;
 
+export type JsonSchema = {
+  name: string;
+  schema: Record<string, unknown>;
+  strict?: boolean;
+};
+
+export type OutputSchema = JsonSchema;
+
+export type ResponseFormat =
+  | { type: "text" }
+  | { type: "json_object" }
+  | { type: "json_schema"; json_schema: JsonSchema };
+
 export type InvokeParams = {
   messages: Message[];
   tools?: Tool[];
@@ -93,7 +105,44 @@ export type InvokeResult = {
   };
 };
 
-export type JsonSchema = {
-  name: string;
-  schema: Record<string, unknown>;
-  strict?: boolean;
+/**
+ * Invoke the LLM API (OpenAI-compatible endpoint).
+ * In production, this connects to your AI provider.
+ * The API key should be set via environment variables.
+ */
+export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
+  const apiKey = process.env.OPENAI_API_KEY || process.env.LLM_API_KEY;
+  const apiUrl =
+    process.env.LLM_API_URL || "https://api.openai.com/v1/chat/completions";
+
+  const body: Record<string, unknown> = {
+    model: process.env.LLM_MODEL || "gpt-4o-mini",
+    messages: params.messages,
+    max_tokens: params.maxTokens || params.max_tokens || 1024,
+  };
+
+  if (params.tools) {
+    body.tools = params.tools;
+  }
+  if (params.toolChoice || params.tool_choice) {
+    body.tool_choice = params.toolChoice || params.tool_choice;
+  }
+  if (params.responseFormat || params.response_format) {
+    body.response_format = params.responseFormat || params.response_format;
+  }
+
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`LLM API error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json() as Promise<InvokeResult>;
+}
