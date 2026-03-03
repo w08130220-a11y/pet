@@ -13,16 +13,24 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/use-colors';
 import { useAppStore } from './store';
-import { SERVICE_CATEGORY_LABELS, SERVICE_CATEGORY_ICONS, type ServiceCategory, type Provider } from './types';
+import { SERVICE_CATEGORY_LABELS, SERVICE_CATEGORY_ICONS, CITIES, type ServiceCategory, type Provider } from './types';
 
 const CATEGORIES: ServiceCategory[] = ['nail', 'hair', 'massage', 'lash', 'spa', 'tattoo'];
 
-function ProviderCard({ provider, onPress }: { provider: Provider; onPress: () => void }) {
+function ProviderCard({ provider, onPress, isFavorite, onToggleFavorite }: {
+  provider: Provider;
+  onPress: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+}) {
   const colors = useColors();
   const categoryLabel = SERVICE_CATEGORY_LABELS[provider.category];
   const priceRange = provider.services.length > 0
     ? `$${Math.min(...provider.services.map((s) => s.price))} - $${Math.max(...provider.services.map((s) => s.price))}`
     : '';
+
+  // Item #7: thumbs rating
+  const filledThumbs = Math.round(provider.rating);
 
   return (
     <TouchableOpacity
@@ -64,16 +72,25 @@ function ProviderCard({ provider, onPress }: { provider: Provider; onPress: () =
         </View>
 
         <View style={{ alignItems: 'flex-end' }}>
+          {/* Item #1: Favorite button */}
+          <TouchableOpacity
+            onPress={(e) => { e.stopPropagation?.(); onToggleFavorite(); }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={{ marginBottom: 6 }}
+          >
+            <Text style={{ fontSize: 18 }}>{isFavorite ? '❤️' : '🤍'}</Text>
+          </TouchableOpacity>
+          {/* Item #7: Thumbs rating */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-            <Text style={{ fontSize: 14, color: '#F5A623', marginRight: 3 }}>★</Text>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.foreground }}>
-              {provider.rating}
-            </Text>
-            <Text style={{ fontSize: 12, color: colors.muted, marginLeft: 2 }}>
-              ({provider.reviewCount})
-            </Text>
+            <Text style={{ fontSize: 12 }}>{'👍'.repeat(filledThumbs)}</Text>
           </View>
-          <Text style={{ fontSize: 13, color: colors.secondary, fontWeight: '500' }}>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.foreground }}>
+            {provider.rating}
+            <Text style={{ fontSize: 12, color: colors.muted, fontWeight: '400' }}>
+              {' '}({provider.reviewCount})
+            </Text>
+          </Text>
+          <Text style={{ fontSize: 13, color: colors.secondary, fontWeight: '500', marginTop: 2 }}>
             {priceRange}
           </Text>
         </View>
@@ -107,7 +124,7 @@ export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { state, dispatch, getFilteredProviders } = useAppStore();
+  const { state, dispatch, getFilteredProviders, toggleFavorite, isFavorite } = useAppStore();
   const [showCityFilter, setShowCityFilter] = useState(false);
 
   const filteredProviders = getFilteredProviders();
@@ -162,7 +179,7 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* City Filter */}
+        {/* City Filter - Item #5: Show all cities */}
         <TouchableOpacity
           onPress={() => setShowCityFilter(!showCityFilter)}
           style={{
@@ -200,7 +217,8 @@ export default function HomeScreen() {
                 全部
               </Text>
             </TouchableOpacity>
-            {['台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市'].map((city) => (
+            {/* Item #5: show ALL cities across Taiwan */}
+            {CITIES.map((city) => (
               <TouchableOpacity
                 key={city}
                 onPress={() => { dispatch({ type: 'SET_CITY', payload: city }); setShowCityFilter(false); }}
@@ -270,7 +288,7 @@ export default function HomeScreen() {
         </ScrollView>
       </View>
 
-      {/* Results */}
+      {/* Results - Item #8: already sorted by rating in store */}
       <FlatList
         data={filteredProviders}
         keyExtractor={(item) => item.id}
@@ -289,6 +307,8 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <ProviderCard
             provider={item}
+            isFavorite={isFavorite(item.id)}
+            onToggleFavorite={() => toggleFavorite(item.id)}
             onPress={() => router.push({ pathname: '/[id]', params: { id: item.id } })}
           />
         )}

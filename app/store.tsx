@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Provider, Service, Booking, Review, TimeSlot, ServiceCategory } from './types';
+import type { Provider, Service, StaffMember, Booking, Review, TimeSlot, ServiceCategory } from './types';
 
 // ── State ──
 interface AppState {
   providers: Provider[];
   bookings: Booking[];
   reviews: Review[];
+  favorites: string[]; // provider IDs
   isLoading: boolean;
   searchQuery: string;
   selectedCategory: ServiceCategory | null;
@@ -18,6 +19,7 @@ const initialState: AppState = {
   providers: [],
   bookings: [],
   reviews: [],
+  favorites: [],
   isLoading: true,
   searchQuery: '',
   selectedCategory: null,
@@ -36,9 +38,16 @@ type Action =
   | { type: 'ADD_BOOKING'; payload: Booking }
   | { type: 'UPDATE_BOOKING'; payload: { id: string; updates: Partial<Booking> } }
   | { type: 'CANCEL_BOOKING'; payload: string }
+  | { type: 'PROVIDER_CANCEL_BOOKING'; payload: string }
   | { type: 'ADD_REVIEW'; payload: Review }
   | { type: 'ADD_PROVIDER'; payload: Provider }
-  | { type: 'UPDATE_PROVIDER'; payload: { id: string; updates: Partial<Provider> } };
+  | { type: 'UPDATE_PROVIDER'; payload: { id: string; updates: Partial<Provider> } }
+  | { type: 'TOGGLE_FAVORITE'; payload: string }
+  | { type: 'ADD_SERVICE'; payload: { providerId: string; service: Service } }
+  | { type: 'DELETE_SERVICE'; payload: { providerId: string; serviceId: string } }
+  | { type: 'UPDATE_SERVICE'; payload: { providerId: string; serviceId: string; updates: Partial<Service> } }
+  | { type: 'ADD_STAFF'; payload: { providerId: string; staff: StaffMember } }
+  | { type: 'DELETE_STAFF'; payload: { providerId: string; staffId: string } };
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -70,6 +79,12 @@ function reducer(state: AppState, action: Action): AppState {
       );
       return { ...state, bookings };
     }
+    case 'PROVIDER_CANCEL_BOOKING': {
+      const bookings = state.bookings.map((b) =>
+        b.id === action.payload ? { ...b, status: 'provider_cancelled' as const } : b
+      );
+      return { ...state, bookings };
+    }
     case 'ADD_REVIEW': {
       const reviews = [...state.reviews, action.payload];
       return { ...state, reviews };
@@ -81,6 +96,58 @@ function reducer(state: AppState, action: Action): AppState {
     case 'UPDATE_PROVIDER': {
       const providers = state.providers.map((p) =>
         p.id === action.payload.id ? { ...p, ...action.payload.updates } : p
+      );
+      return { ...state, providers };
+    }
+    case 'TOGGLE_FAVORITE': {
+      const id = action.payload;
+      const favorites = state.favorites.includes(id)
+        ? state.favorites.filter((f) => f !== id)
+        : [...state.favorites, id];
+      return { ...state, favorites };
+    }
+    case 'ADD_SERVICE': {
+      const providers = state.providers.map((p) =>
+        p.id === action.payload.providerId
+          ? { ...p, services: [...p.services, action.payload.service] }
+          : p
+      );
+      return { ...state, providers };
+    }
+    case 'DELETE_SERVICE': {
+      const providers = state.providers.map((p) =>
+        p.id === action.payload.providerId
+          ? { ...p, services: p.services.filter((s) => s.id !== action.payload.serviceId) }
+          : p
+      );
+      return { ...state, providers };
+    }
+    case 'UPDATE_SERVICE': {
+      const providers = state.providers.map((p) =>
+        p.id === action.payload.providerId
+          ? {
+              ...p,
+              services: p.services.map((s) =>
+                s.id === action.payload.serviceId ? { ...s, ...action.payload.updates } : s
+              ),
+            }
+          : p
+      );
+      return { ...state, providers };
+    }
+    case 'ADD_STAFF': {
+      const providers = state.providers.map((p) =>
+        p.id === action.payload.providerId
+          ? { ...p, staffMembers: [...p.staffMembers, action.payload.staff] }
+          : p
+      );
+      return { ...state, providers };
+    }
+    case 'DELETE_STAFF': {
+      const providers = state.providers.map((p) =>
+        p.id === action.payload.providerId
+          ? { ...p, staffMembers: p.staffMembers.filter((s) => s.id !== action.payload.staffId) }
+          : p
       );
       return { ...state, providers };
     }
@@ -104,6 +171,7 @@ const MOCK_PROVIDERS: Provider[] = [
     imageUri: '',
     description: '日系高質感美甲工作室，專注凝膠美甲與手足保養。環境舒適寧靜，使用日本進口材料。',
     isVerified: true,
+    photos: [],
     services: [
       { id: 's1', providerId: '1', name: '單色凝膠美甲', description: '含基礎保養+單色凝膠', category: 'nail', duration: 60, price: 800, isAvailable: true },
       { id: 's2', providerId: '1', name: '造型凝膠美甲', description: '含基礎保養+造型設計', category: 'nail', duration: 90, price: 1500, isAvailable: true },
@@ -137,6 +205,7 @@ const MOCK_PROVIDERS: Provider[] = [
     imageUri: '',
     description: '簡約風格髮廊，擅長韓系髮型設計與質感染髮。使用OLAPLEX護髮系統。',
     isVerified: true,
+    photos: [],
     services: [
       { id: 's5', providerId: '2', name: '剪髮', description: '含洗髮+造型吹整', category: 'hair', duration: 60, price: 800, isAvailable: true },
       { id: 's6', providerId: '2', name: '染髮', description: '全頭染髮（不含漂髮）', category: 'hair', duration: 120, price: 2500, isAvailable: true },
@@ -171,6 +240,7 @@ const MOCK_PROVIDERS: Provider[] = [
     imageUri: '',
     description: '傳統與現代結合的養身按摩會館。提供泰式、精油、指壓等多種按摩服務。',
     isVerified: true,
+    photos: [],
     services: [
       { id: 's9', providerId: '3', name: '全身指壓', description: '傳統指壓手法，舒緩疲勞', category: 'massage', duration: 60, price: 1000, isAvailable: true },
       { id: 's10', providerId: '3', name: '精油SPA', description: '天然精油全身按摩+熱敷', category: 'massage', duration: 90, price: 1800, isAvailable: true },
@@ -204,6 +274,7 @@ const MOCK_PROVIDERS: Provider[] = [
     imageUri: '',
     description: '專業美睫工作室，提供自然款到濃密款各式嫁接。使用韓國進口睫毛。',
     isVerified: true,
+    photos: [],
     services: [
       { id: 's13', providerId: '4', name: '自然款嫁接', description: '80根，自然素顏感', category: 'lash', duration: 75, price: 1000, isAvailable: true },
       { id: 's14', providerId: '4', name: '濃密款嫁接', description: '120根，濃密有神', category: 'lash', duration: 90, price: 1500, isAvailable: true },
@@ -235,6 +306,7 @@ const MOCK_PROVIDERS: Provider[] = [
     imageUri: '',
     description: '都市中的靜謐綠洲，提供臉部保養、身體護理等全方位SPA體驗。',
     isVerified: false,
+    photos: [],
     services: [
       { id: 's16', providerId: '5', name: '臉部深層保養', description: '清潔+導入+面膜', category: 'spa', duration: 75, price: 1800, isAvailable: true },
       { id: 's17', providerId: '5', name: '全身去角質', description: '磨砂去角質+保濕潤膚', category: 'spa', duration: 60, price: 1200, isAvailable: true },
@@ -267,6 +339,7 @@ const MOCK_PROVIDERS: Provider[] = [
     imageUri: '',
     description: '高端半永久紋繡工作室，專精霧眉、髮際線、美瞳線。一對一服務，預約制。',
     isVerified: true,
+    photos: [],
     services: [
       { id: 's19', providerId: '6', name: '韓式霧眉', description: '自然霧感眉型設計', category: 'tattoo', duration: 120, price: 8000, isAvailable: true },
       { id: 's20', providerId: '6', name: '美瞳線', description: '自然放大雙眼', category: 'tattoo', duration: 90, price: 6000, isAvailable: true },
@@ -298,6 +371,7 @@ const STORAGE_KEYS = {
   bookings: 'beautybook_bookings',
   reviews: 'beautybook_reviews',
   role: 'beautybook_role',
+  favorites: 'beautybook_favorites',
 };
 
 // ── Context ──
@@ -310,7 +384,10 @@ interface AppContextType {
   getAvailableSlots: (providerId: string, staffId: string, date: string) => TimeSlot[];
   createBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => void;
   cancelBooking: (id: string) => void;
+  providerCancelBooking: (id: string) => void;
   addReview: (review: Omit<Review, 'id' | 'createdAt'>) => void;
+  toggleFavorite: (providerId: string) => void;
+  isFavorite: (providerId: string) => boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -323,10 +400,11 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const [bookingsStr, reviewsStr, roleStr] = await Promise.all([
+        const [bookingsStr, reviewsStr, roleStr, favoritesStr] = await Promise.all([
           AsyncStorage.getItem(STORAGE_KEYS.bookings),
           AsyncStorage.getItem(STORAGE_KEYS.reviews),
           AsyncStorage.getItem(STORAGE_KEYS.role),
+          AsyncStorage.getItem(STORAGE_KEYS.favorites),
         ]);
         dispatch({
           type: 'LOAD_DATA',
@@ -334,6 +412,7 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
             providers: MOCK_PROVIDERS,
             bookings: bookingsStr ? JSON.parse(bookingsStr) : [],
             reviews: reviewsStr ? JSON.parse(reviewsStr) : MOCK_REVIEWS,
+            favorites: favoritesStr ? JSON.parse(favoritesStr) : [],
             userRole: (roleStr as 'customer' | 'provider') || 'customer',
           },
         });
@@ -364,6 +443,13 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.userRole, state.isLoading]);
 
+  // Persist favorites
+  useEffect(() => {
+    if (!state.isLoading) {
+      AsyncStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify(state.favorites));
+    }
+  }, [state.favorites, state.isLoading]);
+
   const getProvider = useCallback(
     (id: string) => state.providers.find((p) => p.id === id),
     [state.providers]
@@ -387,6 +473,8 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
           p.staffMembers.some((s) => s.name.toLowerCase().includes(q))
       );
     }
+    // Sort by rating descending (higher rating first)
+    result = [...result].sort((a, b) => b.rating - a.rating);
     return result;
   }, [state.providers, state.selectedCategory, state.selectedCity, state.searchQuery]);
 
@@ -453,6 +541,10 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'CANCEL_BOOKING', payload: id });
   }, []);
 
+  const providerCancelBooking = useCallback((id: string) => {
+    dispatch({ type: 'PROVIDER_CANCEL_BOOKING', payload: id });
+  }, []);
+
   const addReview = useCallback((review: Omit<Review, 'id' | 'createdAt'>) => {
     const newReview: Review = {
       ...review,
@@ -462,9 +554,18 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'ADD_REVIEW', payload: newReview });
   }, []);
 
+  const toggleFavorite = useCallback((providerId: string) => {
+    dispatch({ type: 'TOGGLE_FAVORITE', payload: providerId });
+  }, []);
+
+  const isFavorite = useCallback(
+    (providerId: string) => state.favorites.includes(providerId),
+    [state.favorites]
+  );
+
   return (
     <AppContext.Provider
-      value={{ state, dispatch, getProvider, getFilteredProviders, getAvailableSlots, createBooking, cancelBooking, addReview }}
+      value={{ state, dispatch, getProvider, getFilteredProviders, getAvailableSlots, createBooking, cancelBooking, providerCancelBooking, addReview, toggleFavorite, isFavorite }}
     >
       {children}
     </AppContext.Provider>

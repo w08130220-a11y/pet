@@ -18,11 +18,12 @@ export default function ProfileScreen() {
   const totalBookings = state.bookings.length;
   const completedBookings = state.bookings.filter((b) => b.status === 'completed').length;
   const totalReviews = state.reviews.length;
+  const totalFavorites = state.favorites.length;
 
   const menuItems = [
     { icon: '📋', label: '預約紀錄', value: `${totalBookings} 筆` },
-    { icon: '⭐', label: '我的評價', value: `${totalReviews} 則` },
-    { icon: '❤️', label: '收藏店家', value: '0 間' },
+    { icon: '👍', label: '我的評價', value: `${totalReviews} 則` },
+    { icon: '❤️', label: '收藏店家', value: `${totalFavorites} 間` },
     { icon: '🎫', label: '優惠券', value: '0 張' },
   ];
 

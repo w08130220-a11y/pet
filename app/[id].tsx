@@ -7,22 +7,33 @@ import {
   TextInput,
   Platform,
   Alert,
-  ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useColors } from '@/hooks/use-colors';
 import { useAppStore } from './store';
-import { SERVICE_CATEGORY_LABELS, type Service, type StaffMember, type TimeSlot } from './types';
+import { SERVICE_CATEGORY_LABELS, type Service, type StaffMember } from './types';
 
 type Step = 'detail' | 'select-service' | 'select-staff' | 'select-time' | 'confirm';
+
+// Render thumbs-up rating (item #7)
+function ThumbsRating({ rating, size = 14 }: { rating: number; size?: number }) {
+  const filled = Math.round(rating);
+  return (
+    <Text style={{ fontSize: size }}>
+      {'👍'.repeat(filled)}{'👍🏻'.repeat(0)}
+      {filled < 5 && <Text style={{ opacity: 0.25 }}>{'👍'.repeat(5 - filled)}</Text>}
+    </Text>
+  );
+}
 
 export default function ProviderDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getProvider, getAvailableSlots, createBooking, state } = useAppStore();
+  const { getProvider, getAvailableSlots, createBooking, state, toggleFavorite, isFavorite } = useAppStore();
 
   const provider = getProvider(id);
 
@@ -32,6 +43,9 @@ export default function ProviderDetailScreen() {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [note, setNote] = useState('');
+  const [showDepositDisclaimer, setShowDepositDisclaimer] = useState(false);
+
+  const favorited = isFavorite(id);
 
   // Generate next 7 days
   const dates = useMemo(() => {
@@ -58,7 +72,8 @@ export default function ProviderDetailScreen() {
     return getAvailableSlots(id, selectedStaff.id, selectedDate);
   }, [id, selectedStaff, selectedDate, getAvailableSlots]);
 
-  const depositAmount = selectedService ? Math.round(selectedService.price * 0.3) : 0;
+  // Item #4: deposit is now 10%
+  const depositAmount = selectedService ? Math.round(selectedService.price * 0.1) : 0;
 
   // Provider reviews
   const providerReviews = state.reviews.filter((r) => r.providerId === id);
@@ -73,6 +88,28 @@ export default function ProviderDetailScreen() {
       </View>
     );
   }
+
+  // Item #10: open address in Google Maps
+  const openGoogleMaps = () => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.address)}`;
+    Linking.openURL(url);
+  };
+
+  // Item #11: dial phone number
+  const callPhone = () => {
+    const cleaned = provider.phone.replace(/[^0-9]/g, '');
+    Linking.openURL(`tel:${cleaned}`);
+  };
+
+  // Item #4: show deposit disclaimer before confirming
+  const handleProceedToConfirm = () => {
+    setShowDepositDisclaimer(true);
+  };
+
+  const handleAcceptDisclaimer = () => {
+    setShowDepositDisclaimer(false);
+    handleConfirmBooking();
+  };
 
   const handleConfirmBooking = () => {
     if (!selectedService || !selectedStaff || !selectedDate || !selectedTime) return;
@@ -137,15 +174,80 @@ export default function ProviderDetailScreen() {
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
       }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity onPress={goBack} style={{ marginRight: 12, padding: 4 }}>
-            <Text style={{ fontSize: 16, color: colors.foreground }}>←</Text>
-          </TouchableOpacity>
-          <Text style={{ fontSize: 18, fontWeight: '600', color: colors.foreground }}>
-            {stepTitles[step]}
-          </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <TouchableOpacity onPress={goBack} style={{ marginRight: 12, padding: 4 }}>
+              <Text style={{ fontSize: 16, color: colors.foreground }}>←</Text>
+            </TouchableOpacity>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: colors.foreground }} numberOfLines={1}>
+              {stepTitles[step]}
+            </Text>
+          </View>
+          {/* Item #1: Favorite Button */}
+          {step === 'detail' && (
+            <TouchableOpacity onPress={() => toggleFavorite(id)} style={{ padding: 4 }}>
+              <Text style={{ fontSize: 22 }}>{favorited ? '❤️' : '🤍'}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
+
+      {/* Item #4: Deposit Disclaimer Modal */}
+      {showDepositDisclaimer && (
+        <View style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 999,
+          padding: 30,
+        }}>
+          <View style={{
+            backgroundColor: colors.surface,
+            borderRadius: 16,
+            padding: 24,
+            maxWidth: 340,
+            width: '100%',
+          }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: colors.foreground, marginBottom: 12, textAlign: 'center' }}>
+              訂金告知
+            </Text>
+            <Text style={{ fontSize: 14, color: colors.foreground, lineHeight: 22, marginBottom: 8 }}>
+              本次預約將收取服務金額 10% 作為訂金。
+            </Text>
+            <Text style={{ fontSize: 14, color: colors.error, lineHeight: 22, marginBottom: 8, fontWeight: '500' }}>
+              注意事項：
+            </Text>
+            <Text style={{ fontSize: 13, color: colors.foreground, lineHeight: 20, marginBottom: 4 }}>
+              • 無故未到或取消預約，訂金視同放棄，恕不退還。
+            </Text>
+            <Text style={{ fontSize: 13, color: colors.foreground, lineHeight: 20, marginBottom: 16 }}>
+              • 私底下交易，本平台不承擔任何保障。
+            </Text>
+            <TouchableOpacity
+              onPress={handleAcceptDisclaimer}
+              style={{
+                backgroundColor: colors.primary,
+                borderRadius: 10,
+                paddingVertical: 14,
+                alignItems: 'center',
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.surface }}>
+                我已了解，確認付款 ${depositAmount}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowDepositDisclaimer(false)}
+              style={{ paddingVertical: 10, alignItems: 'center' }}
+            >
+              <Text style={{ fontSize: 14, color: colors.muted }}>取消</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
         {/* ── Step: Provider Detail ── */}
@@ -170,9 +272,10 @@ export default function ProviderDetailScreen() {
                 )}
               </View>
 
+              {/* Item #7: thumbs rating */}
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                <Text style={{ fontSize: 14, color: '#F5A623', marginRight: 3 }}>★</Text>
-                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.foreground }}>
+                <ThumbsRating rating={provider.rating} size={14} />
+                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.foreground, marginLeft: 6 }}>
                   {provider.rating}
                 </Text>
                 <Text style={{ fontSize: 13, color: colors.muted, marginLeft: 4 }}>
@@ -185,7 +288,55 @@ export default function ProviderDetailScreen() {
               </Text>
             </View>
 
-            {/* Contact & Address */}
+            {/* Item #9: Photo Gallery (max 6) */}
+            {provider.photos && provider.photos.length > 0 && (
+              <>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.foreground, marginBottom: 10 }}>
+                  店鋪相簿
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+                  {provider.photos.slice(0, 6).map((photo, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: 10,
+                        backgroundColor: colors.border,
+                        marginRight: 8,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Text style={{ fontSize: 12, color: colors.muted }}>照片 {index + 1}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+              </>
+            )}
+            {/* Photo gallery placeholder when no photos */}
+            {(!provider.photos || provider.photos.length === 0) && (
+              <>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.foreground, marginBottom: 10 }}>
+                  店鋪相簿
+                </Text>
+                <View style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  padding: 24,
+                  alignItems: 'center',
+                  marginBottom: 20,
+                }}>
+                  <Text style={{ fontSize: 30, marginBottom: 6 }}>📷</Text>
+                  <Text style={{ fontSize: 13, color: colors.muted }}>商家尚未上傳照片</Text>
+                </View>
+              </>
+            )}
+
+            {/* Contact & Address - Item #10 & #11 */}
             <View style={{
               backgroundColor: colors.surface,
               borderRadius: 12,
@@ -194,14 +345,28 @@ export default function ProviderDetailScreen() {
               padding: 14,
               marginBottom: 20,
             }}>
-              <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+              {/* Address → Google Maps */}
+              <TouchableOpacity
+                onPress={openGoogleMaps}
+                style={{ flexDirection: 'row', marginBottom: 8, alignItems: 'center' }}
+              >
                 <Text style={{ fontSize: 13, color: colors.muted, width: 50 }}>地址</Text>
-                <Text style={{ fontSize: 13, color: colors.foreground, flex: 1 }}>{provider.address}</Text>
-              </View>
-              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ fontSize: 13, color: colors.primary, flex: 1, textDecorationLine: 'underline' }}>
+                  {provider.address}
+                </Text>
+                <Text style={{ fontSize: 12, marginLeft: 4 }}>📍</Text>
+              </TouchableOpacity>
+              {/* Phone → dial */}
+              <TouchableOpacity
+                onPress={callPhone}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+              >
                 <Text style={{ fontSize: 13, color: colors.muted, width: 50 }}>電話</Text>
-                <Text style={{ fontSize: 13, color: colors.foreground }}>{provider.phone}</Text>
-              </View>
+                <Text style={{ fontSize: 13, color: colors.primary, textDecorationLine: 'underline' }}>
+                  {provider.phone}
+                </Text>
+                <Text style={{ fontSize: 12, marginLeft: 4 }}>📞</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Services Preview */}
@@ -271,7 +436,7 @@ export default function ProviderDetailScreen() {
                     {staff.name}
                   </Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>
-                    {staff.title} · ★ {staff.rating} ({staff.reviewCount})
+                    {staff.title} · <ThumbsRating rating={staff.rating} size={11} /> ({staff.reviewCount})
                   </Text>
                   <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
                     {staff.specialties.join('、')}
@@ -280,7 +445,7 @@ export default function ProviderDetailScreen() {
               </View>
             ))}
 
-            {/* Reviews */}
+            {/* Reviews with thumbs rating (#7) */}
             {providerReviews.length > 0 && (
               <>
                 <Text style={{ fontSize: 16, fontWeight: '600', color: colors.foreground, marginTop: 16, marginBottom: 10 }}>
@@ -302,9 +467,7 @@ export default function ProviderDetailScreen() {
                       <Text style={{ fontSize: 13, color: colors.muted }}>
                         {review.serviceName} · {review.staffName}
                       </Text>
-                      <Text style={{ fontSize: 13, color: '#F5A623' }}>
-                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                      </Text>
+                      <ThumbsRating rating={review.rating} size={13} />
                     </View>
                     <Text style={{ fontSize: 14, color: colors.foreground, lineHeight: 20 }}>
                       {review.comment}
@@ -402,7 +565,7 @@ export default function ProviderDetailScreen() {
                       ${service.price}
                     </Text>
                     <Text style={{ fontSize: 11, color: colors.muted, marginTop: 2 }}>
-                      訂金 ${Math.round(service.price * 0.3)}
+                      訂金 ${Math.round(service.price * 0.1)}
                     </Text>
                   </View>
                 </View>
@@ -460,12 +623,7 @@ export default function ProviderDetailScreen() {
                   </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 13, color: '#F5A623' }}>★</Text>
-                    <Text style={{ fontSize: 14, fontWeight: '500', color: colors.foreground, marginLeft: 3 }}>
-                      {staff.rating}
-                    </Text>
-                  </View>
+                  <ThumbsRating rating={staff.rating} size={12} />
                   <Text style={{ fontSize: 11, color: colors.muted, marginTop: 2 }}>
                     {staff.reviewCount} 則評價
                   </Text>
@@ -516,7 +674,7 @@ export default function ProviderDetailScreen() {
               ))}
             </ScrollView>
 
-            {/* Time Selection */}
+            {/* Time Selection - Item #3: only show available slots */}
             <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 12 }}>
               選擇時段
             </Text>
@@ -533,26 +691,43 @@ export default function ProviderDetailScreen() {
               </View>
             ) : (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {availableSlots.filter((s) => s.isAvailable).map((slot) => (
+                {availableSlots.map((slot) => (
                   <TouchableOpacity
                     key={slot.id}
+                    disabled={!slot.isAvailable}
                     onPress={() => setSelectedTime(slot.time)}
                     style={{
                       paddingHorizontal: 18,
                       paddingVertical: 10,
                       borderRadius: 8,
-                      backgroundColor: selectedTime === slot.time ? colors.primary : colors.surface,
+                      backgroundColor: !slot.isAvailable
+                        ? colors.border
+                        : selectedTime === slot.time
+                          ? colors.primary
+                          : colors.surface,
                       borderWidth: 1,
-                      borderColor: selectedTime === slot.time ? colors.primary : colors.border,
+                      borderColor: !slot.isAvailable
+                        ? colors.border
+                        : selectedTime === slot.time
+                          ? colors.primary
+                          : colors.border,
+                      opacity: slot.isAvailable ? 1 : 0.4,
                     }}
                   >
                     <Text style={{
                       fontSize: 14,
                       fontWeight: '500',
-                      color: selectedTime === slot.time ? colors.surface : colors.foreground,
+                      color: !slot.isAvailable
+                        ? colors.muted
+                        : selectedTime === slot.time
+                          ? colors.surface
+                          : colors.foreground,
                     }}>
                       {slot.time}
                     </Text>
+                    {!slot.isAvailable && (
+                      <Text style={{ fontSize: 9, color: colors.muted, textAlign: 'center' }}>已預約</Text>
+                    )}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -640,7 +815,7 @@ export default function ProviderDetailScreen() {
               } as any}
             />
 
-            {/* Price Summary */}
+            {/* Price Summary - Item #4: 10% deposit */}
             <View style={{
               backgroundColor: colors.surface,
               borderRadius: 12,
@@ -654,7 +829,7 @@ export default function ProviderDetailScreen() {
                 <Text style={{ fontSize: 14, color: colors.foreground }}>${selectedService.price}</Text>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                <Text style={{ fontSize: 14, color: colors.foreground }}>訂金（30%）</Text>
+                <Text style={{ fontSize: 14, color: colors.foreground }}>訂金（10%）</Text>
                 <Text style={{ fontSize: 14, fontWeight: '600', color: colors.primary }}>${depositAmount}</Text>
               </View>
               <View style={{
@@ -669,21 +844,28 @@ export default function ProviderDetailScreen() {
               </View>
             </View>
 
-            {/* Payment Note */}
+            {/* Payment Note - Item #4 */}
             <View style={{
-              backgroundColor: colors.background,
+              backgroundColor: '#FFF3E0',
               borderRadius: 8,
               padding: 12,
               marginBottom: 20,
+              borderWidth: 1,
+              borderColor: '#FFB74D',
             }}>
-              <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 18 }}>
-                ⓘ 預約成功後將收取 30% 訂金。取消政策：24小時前免費取消，24小時內取消將扣除訂金。
+              <Text style={{ fontSize: 13, color: '#E65100', lineHeight: 20, fontWeight: '500' }}>
+                ⚠ 重要提醒
+              </Text>
+              <Text style={{ fontSize: 12, color: '#BF360C', lineHeight: 18, marginTop: 4 }}>
+                • 預約成功後將收取服務金額 10% 作為訂金。{'\n'}
+                • 無故未到或取消預約，訂金視同放棄，恕不退還。{'\n'}
+                • 私底下交易，本平台不承擔任何保障。
               </Text>
             </View>
 
-            {/* Confirm Button */}
+            {/* Confirm Button - triggers disclaimer popup */}
             <TouchableOpacity
-              onPress={handleConfirmBooking}
+              onPress={handleProceedToConfirm}
               style={{
                 backgroundColor: colors.primary,
                 borderRadius: 10,

@@ -36,6 +36,7 @@ export interface Provider {
   services: Service[];
   staffMembers: StaffMember[];
   businessHours: BusinessHours;
+  photos: string[]; // store photo URIs, max 6
 }
 
 export interface Service {
@@ -73,7 +74,7 @@ export interface TimeSlot {
   isAvailable: boolean;
 }
 
-export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'provider_cancelled';
 
 export interface Booking {
   id: string;
@@ -111,6 +112,7 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
   confirmed: '已確認',
   completed: '已完成',
   cancelled: '已取消',
+  provider_cancelled: '商家取消',
 };
 
 export const CITIES = [
