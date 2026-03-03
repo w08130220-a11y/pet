@@ -3,74 +3,88 @@ import { COOKIE_NAME } from "../shared/const.js";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { chatWithPet, getAutonomousBehavior } from "./ai-pet-chat";
 
 export const appRouter = router({
-  // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
+
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
   }),
 
-  // AI Pet Chat (Premium Feature)
-  petAI: router({
-    chat: publicProcedure
+  // Provider search
+  providers: router({
+    list: publicProcedure
       .input(
         z.object({
-          petInfo: z.object({
-            name: z.string(),
-            species: z.string(),
-            breed: z.string().optional(),
-            age: z.number().optional(),
-            weight: z.number().optional(),
-          }),
-          message: z.string().min(1).max(500),
-          conversationHistory: z
-            .array(
-              z.object({
-                role: z.enum(["user", "assistant"]),
-                content: z.string(),
-              })
-            )
-            .optional()
-            .default([]),
-        })
+          category: z.enum(['nail', 'hair', 'massage', 'lash', 'spa', 'tattoo']).optional(),
+          city: z.string().optional(),
+          query: z.string().optional(),
+        }).optional()
       )
-      .mutation(async ({ input }) => {
-        const response = await chatWithPet(
-          input.petInfo,
-          input.message,
-          input.conversationHistory
-        );
-        return response;
+      .query(({ input }) => {
+        // In production, this would query the database
+        return { providers: [], total: 0 };
       }),
 
-    autonomousBehavior: publicProcedure
+    getById: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(({ input }) => {
+        return null;
+      }),
+  }),
+
+  // Booking management
+  bookings: router({
+    create: publicProcedure
       .input(
         z.object({
-          petInfo: z.object({
-            name: z.string(),
-            species: z.string(),
-            breed: z.string().optional(),
-          }),
-          currentTime: z.string(),
-          recentActivity: z.array(z.string()).optional().default([]),
+          providerId: z.string(),
+          serviceId: z.string(),
+          staffId: z.string(),
+          date: z.string(),
+          time: z.string(),
+          note: z.string().optional().default(''),
         })
       )
-      .mutation(async ({ input }) => {
-        const behavior = await getAutonomousBehavior(
-          input.petInfo,
-          input.currentTime,
-          input.recentActivity
-        );
-        return behavior;
+      .mutation(({ input }) => {
+        return { success: true, bookingId: `b-${Date.now()}` };
+      }),
+
+    cancel: publicProcedure
+      .input(z.object({ bookingId: z.string() }))
+      .mutation(({ input }) => {
+        return { success: true };
+      }),
+
+    list: publicProcedure.query(() => {
+      return { bookings: [] };
+    }),
+  }),
+
+  // Review management
+  reviews: router({
+    create: publicProcedure
+      .input(
+        z.object({
+          bookingId: z.string(),
+          providerId: z.string(),
+          rating: z.number().min(1).max(5),
+          comment: z.string().max(500),
+        })
+      )
+      .mutation(({ input }) => {
+        return { success: true };
+      }),
+
+    listByProvider: publicProcedure
+      .input(z.object({ providerId: z.string() }))
+      .query(({ input }) => {
+        return { reviews: [] };
       }),
   }),
 });

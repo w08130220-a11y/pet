@@ -1,218 +1,204 @@
-import { Text, View, FlatList, TouchableOpacity, ScrollView, Alert } from "react-native";
-import { Image } from "expo-image";
-import { useRouter } from "expo-router";
-import * as Haptics from "expo-haptics";
-import { Platform } from "react-native";
-
-import { ScreenContainer } from "@/components/screen-container";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { usePetStore } from "@/lib/pet-store";
-import { useColors } from "@/hooks/use-colors";
-import { Pet } from "@/types";
-
-function PetCard({ pet, onPress, onDelete }: { pet: Pet; onPress: () => void; onDelete: () => void }) {
-  const colors = useColors();
-
-  const speciesLabels: Record<string, string> = {
-    dog: "狗狗",
-    cat: "貓咪",
-    bird: "鳥類",
-    rabbit: "兔子",
-    other: "其他",
-  };
-
-  const handleLongPress = () => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    Alert.alert(
-      "刪除寵物",
-      `確定要刪除 ${pet.name} 嗎？此操作無法復原。`,
-      [
-        { text: "取消", style: "cancel" },
-        { text: "刪除", style: "destructive", onPress: onDelete },
-      ]
-    );
-  };
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      onLongPress={handleLongPress}
-      className="bg-surface rounded-2xl p-4 mr-3 border border-border"
-      style={{ width: 160 }}
-      activeOpacity={0.7}
-    >
-      <View className="w-full aspect-square rounded-xl overflow-hidden mb-3">
-        {pet.photoUri ? (
-          <Image source={{ uri: pet.photoUri }} style={{ width: "100%", height: "100%" }} />
-        ) : (
-          <View className="w-full h-full bg-primary/10 items-center justify-center">
-            <IconSymbol name="pawprint.fill" size={48} color={colors.primary} />
-          </View>
-        )}
-      </View>
-      <Text className="text-foreground font-semibold text-lg">{pet.name}</Text>
-      <Text className="text-muted text-sm">
-        {speciesLabels[pet.species] || pet.species} · {pet.weight}kg
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-function MenuItem({
-  icon,
-  title,
-  subtitle,
-  onPress,
-}: {
-  icon: any;
-  title: string;
-  subtitle?: string;
-  onPress: () => void;
-}) {
-  const colors = useColors();
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      className="flex-row items-center bg-surface rounded-xl p-4 mb-2 border border-border"
-      activeOpacity={0.7}
-    >
-      <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-        <IconSymbol name={icon} size={20} color={colors.primary} />
-      </View>
-      <View className="flex-1 ml-3">
-        <Text className="text-foreground font-medium">{title}</Text>
-        {subtitle && <Text className="text-muted text-sm">{subtitle}</Text>}
-      </View>
-      <IconSymbol name="chevron.right" size={20} color={colors.muted} />
-    </TouchableOpacity>
-  );
-}
+import React from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/use-colors';
+import { useAppStore } from './store';
 
 export default function ProfileScreen() {
-  const router = useRouter();
   const colors = useColors();
-  const { state, deletePet } = usePetStore();
+  const insets = useSafeAreaInsets();
+  const { state, dispatch } = useAppStore();
 
-  const handleAddPet = () => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    router.push("/add-pet" as any);
-  };
+  const totalBookings = state.bookings.length;
+  const completedBookings = state.bookings.filter((b) => b.status === 'completed').length;
+  const totalReviews = state.reviews.length;
 
-  const handlePetPress = (petId: string) => {
-    router.push(`/pet/${petId}` as any);
-  };
+  const menuItems = [
+    { icon: '📋', label: '預約紀錄', value: `${totalBookings} 筆` },
+    { icon: '⭐', label: '我的評價', value: `${totalReviews} 則` },
+    { icon: '❤️', label: '收藏店家', value: '0 間' },
+    { icon: '🎫', label: '優惠券', value: '0 張' },
+  ];
 
-  const handleMedicalRecords = (petId?: string) => {
-    if (state.pets.length === 0) {
-      Alert.alert("提示", "請先新增寵物");
-      return;
-    }
-    const id = petId || state.pets[0].id;
-    router.push(`/medical-records/${id}` as any);
-  };
+  const settingsItems = [
+    { icon: '🔔', label: '通知設定' },
+    { icon: '💳', label: '付款方式' },
+    { icon: '🔒', label: '隱私設定' },
+    { icon: '❓', label: '使用說明' },
+    { icon: '💬', label: '意見回饋' },
+    { icon: '📄', label: '服務條款' },
+  ];
 
   return (
-    <ScreenContainer>
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
-        <Text className="text-2xl font-bold text-foreground">我的</Text>
-      </View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Header */}
+        <View style={{
+          paddingTop: Platform.OS === 'web' ? 20 : insets.top + 8,
+          paddingHorizontal: 20,
+          marginBottom: 24,
+        }}>
+          <Text style={{ fontSize: 28, fontWeight: '700', color: colors.foreground, marginBottom: 20 }}>
+            我的
+          </Text>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* User Profile Section */}
-        <View className="items-center py-6">
-          <View className="w-20 h-20 rounded-full bg-primary/20 items-center justify-center mb-3">
-            <IconSymbol name="person.fill" size={40} color={colors.primary} />
+          {/* Avatar & Info */}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: colors.border,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: 14,
+            }}>
+              <Text style={{ fontSize: 24 }}>👤</Text>
+            </View>
+            <View>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.foreground }}>
+                使用者
+              </Text>
+              <Text style={{ fontSize: 13, color: colors.muted }}>
+                {state.userRole === 'provider' ? '業者帳號' : '一般會員'}
+              </Text>
+            </View>
           </View>
-          <Text className="text-foreground text-xl font-bold">寵物主人</Text>
-          <Text className="text-muted">{state.pets.length} 隻寵物</Text>
         </View>
 
-        {/* My Pets Section */}
-        <View className="mb-6">
-          <View className="flex-row items-center justify-between px-4 mb-3">
-            <Text className="text-foreground font-semibold text-lg">我的寵物</Text>
-            <TouchableOpacity onPress={handleAddPet} activeOpacity={0.7}>
-              <IconSymbol name="plus.circle.fill" size={28} color={colors.primary} />
-            </TouchableOpacity>
-          </View>
-
-          {state.pets.length === 0 ? (
-            <TouchableOpacity
-              onPress={handleAddPet}
-              className="mx-4 bg-surface rounded-2xl p-6 items-center border border-border border-dashed"
-              activeOpacity={0.7}
-            >
-              <View className="w-16 h-16 rounded-full bg-primary/10 items-center justify-center mb-3">
-                <IconSymbol name="plus" size={32} color={colors.primary} />
-              </View>
-              <Text className="text-foreground font-medium">新增您的第一隻寵物</Text>
-              <Text className="text-muted text-sm text-center mt-1">
-                拍照或上傳照片，開始記錄寵物生活
+        {/* Stats */}
+        <View style={{
+          flexDirection: 'row',
+          marginHorizontal: 20,
+          marginBottom: 24,
+          backgroundColor: colors.surface,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: colors.border,
+          padding: 16,
+        }}>
+          {[
+            { label: '已預約', value: totalBookings },
+            { label: '已完成', value: completedBookings },
+            { label: '已評價', value: totalReviews },
+          ].map((stat, i) => (
+            <View key={stat.label} style={{
+              flex: 1,
+              alignItems: 'center',
+              borderLeftWidth: i > 0 ? 1 : 0,
+              borderLeftColor: colors.border,
+            }}>
+              <Text style={{ fontSize: 20, fontWeight: '700', color: colors.foreground, marginBottom: 2 }}>
+                {stat.value}
               </Text>
-            </TouchableOpacity>
-          ) : (
-            <FlatList
-              horizontal
-              data={state.pets}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <PetCard
-                  pet={item}
-                  onPress={() => handlePetPress(item.id)}
-                  onDelete={() => deletePet(item.id)}
-                />
-              )}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-              showsHorizontalScrollIndicator={false}
-            />
-          )}
+              <Text style={{ fontSize: 12, color: colors.muted }}>{stat.label}</Text>
+            </View>
+          ))}
         </View>
 
         {/* Menu Items */}
-        <View className="px-4 pb-8">
-          <Text className="text-foreground font-semibold text-lg mb-3">功能選單</Text>
-
-          <MenuItem
-            icon="cross.case.fill"
-            title="醫療紀錄"
-            subtitle="預防針、健檢、治療紀錄"
-            onPress={() => handleMedicalRecords()}
-          />
-
-          <MenuItem
-            icon="fork.knife"
-            title="飲食管理"
-            subtitle="查看所有飲食紀錄"
-            onPress={() => {
-              if (state.pets.length > 0) {
-                router.push(`/meal-log?petId=${state.pets[0].id}` as any);
-              } else {
-                Alert.alert("提示", "請先新增寵物");
-              }
-            }}
-          />
-
-          <MenuItem
-            icon="bell.fill"
-            title="提醒設定"
-            subtitle="餵食、預防針提醒"
-            onPress={() => Alert.alert("即將推出", "提醒功能開發中")}
-          />
-
-          <MenuItem
-            icon="gearshape.fill"
-            title="設定"
-            subtitle="應用程式設定"
-            onPress={() => Alert.alert("即將推出", "設定功能開發中")}
-          />
+        <View style={{ marginHorizontal: 20, marginBottom: 24 }}>
+          <Text style={{ fontSize: 13, color: colors.muted, marginBottom: 8 }}>我的紀錄</Text>
+          <View style={{
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            overflow: 'hidden',
+          }}>
+            {menuItems.map((item, i) => (
+              <TouchableOpacity
+                key={item.label}
+                activeOpacity={0.7}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  borderTopWidth: i > 0 ? 1 : 0,
+                  borderTopColor: colors.border,
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 16, marginRight: 10 }}>{item.icon}</Text>
+                  <Text style={{ fontSize: 15, color: colors.foreground }}>{item.label}</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 13, color: colors.muted, marginRight: 6 }}>{item.value}</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>›</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
+
+        {/* Settings */}
+        <View style={{ marginHorizontal: 20, marginBottom: 24 }}>
+          <Text style={{ fontSize: 13, color: colors.muted, marginBottom: 8 }}>設定</Text>
+          <View style={{
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            overflow: 'hidden',
+          }}>
+            {settingsItems.map((item, i) => (
+              <TouchableOpacity
+                key={item.label}
+                activeOpacity={0.7}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  borderTopWidth: i > 0 ? 1 : 0,
+                  borderTopColor: colors.border,
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 16, marginRight: 10 }}>{item.icon}</Text>
+                  <Text style={{ fontSize: 15, color: colors.foreground }}>{item.label}</Text>
+                </View>
+                <Text style={{ fontSize: 12, color: colors.muted }}>›</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Role Switch */}
+        <View style={{ marginHorizontal: 20 }}>
+          <TouchableOpacity
+            onPress={() => dispatch({
+              type: 'SET_ROLE',
+              payload: state.userRole === 'customer' ? 'provider' : 'customer',
+            })}
+            style={{
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: colors.border,
+              paddingVertical: 14,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 14, color: colors.muted }}>
+              {state.userRole === 'customer' ? '切換為業者模式' : '切換為客戶模式'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Version */}
+        <Text style={{ textAlign: 'center', fontSize: 12, color: colors.muted, marginTop: 24 }}>
+          BeautyBook v1.0.0
+        </Text>
       </ScrollView>
-    </ScreenContainer>
+    </View>
   );
 }

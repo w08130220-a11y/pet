@@ -1,336 +1,703 @@
-import { Text, View, TouchableOpacity, ScrollView, Alert, TextInput, Modal, KeyboardAvoidingView, Platform as RNPlatform } from "react-native";
-import { Image } from "expo-image";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import * as Haptics from "expo-haptics";
-import { Platform } from "react-native";
+import React, { useState, useMemo } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Platform,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useColors } from '@/hooks/use-colors';
+import { useAppStore } from './store';
+import { SERVICE_CATEGORY_LABELS, type Service, type StaffMember, type TimeSlot } from './index';
 
-import { ScreenContainer } from "@/components/screen-container";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { usePetStore } from "@/lib/pet-store";
-import { useColors } from "@/hooks/use-colors";
-import { Pet, PetSpecies } from "@/types";
+type Step = 'detail' | 'select-service' | 'select-staff' | 'select-time' | 'confirm';
 
-const SPECIES_LABELS: Record<PetSpecies, string> = {
-  dog: "狗狗",
-  cat: "貓咪",
-  bird: "鳥類",
-  rabbit: "兔子",
-  other: "其他",
-};
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="flex-row items-center justify-between py-3 border-b border-border">
-      <Text className="text-muted">{label}</Text>
-      <Text className="text-foreground font-medium">{value}</Text>
-    </View>
-  );
-}
-
-function EditPetModal({
-  visible,
-  pet,
-  onClose,
-  onSave,
-}: {
-  visible: boolean;
-  pet: Pet;
-  onClose: () => void;
-  onSave: (updatedPet: Pet) => void;
-}) {
+export default function ProviderDetailScreen() {
   const colors = useColors();
-  const [name, setName] = useState(pet.name);
-  const [breed, setBreed] = useState(pet.breed);
-  const [weight, setWeight] = useState(pet.weight.toString());
-
-  const handleSave = () => {
-    if (!name.trim()) {
-      Alert.alert("請輸入寵物名稱");
-      return;
-    }
-
-    if (!weight || isNaN(parseFloat(weight))) {
-      Alert.alert("請輸入有效的體重");
-      return;
-    }
-
-    onSave({
-      ...pet,
-      name: name.trim(),
-      breed: breed.trim(),
-      weight: parseFloat(weight),
-    });
-  };
-
-  return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <ScreenContainer edges={["top", "left", "right", "bottom"]} containerClassName="bg-background">
-        <KeyboardAvoidingView
-          behavior={RNPlatform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
-        >
-          {/* Header */}
-          <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
-            <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
-              <Text className="text-primary font-medium">取消</Text>
-            </TouchableOpacity>
-            <Text className="text-lg font-semibold text-foreground">編輯寵物</Text>
-            <TouchableOpacity onPress={handleSave} activeOpacity={0.7}>
-              <Text className="text-primary font-semibold">儲存</Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-            <View className="mt-4">
-              <Text className="text-foreground font-medium mb-2">名稱</Text>
-              <TextInput
-                value={name}
-                onChangeText={setName}
-                placeholder="寵物名稱"
-                placeholderTextColor={colors.muted}
-                className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
-                returnKeyType="done"
-              />
-            </View>
-
-            <View className="mt-4">
-              <Text className="text-foreground font-medium mb-2">品種</Text>
-              <TextInput
-                value={breed}
-                onChangeText={setBreed}
-                placeholder="品種"
-                placeholderTextColor={colors.muted}
-                className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
-                returnKeyType="done"
-              />
-            </View>
-
-            <View className="mt-4">
-              <Text className="text-foreground font-medium mb-2">體重 (kg)</Text>
-              <TextInput
-                value={weight}
-                onChangeText={setWeight}
-                placeholder="體重"
-                placeholderTextColor={colors.muted}
-                keyboardType="decimal-pad"
-                className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
-                returnKeyType="done"
-              />
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </ScreenContainer>
-    </Modal>
-  );
-}
-
-export default function PetDetailScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
-  const colors = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getPetById, updatePet, deletePet, getMedicalByPetId, getTodayMeals, getHealthSuggestion } = usePetStore();
+  const { getProvider, getAvailableSlots, createBooking, state } = useAppStore();
 
-  const [showEditModal, setShowEditModal] = useState(false);
+  const provider = getProvider(id);
 
-  const pet = id ? getPetById(id) : null;
-  const medicalRecords = id ? getMedicalByPetId(id) : [];
-  const todayMeals = id ? getTodayMeals(id) : [];
-  const healthSuggestion = id ? getHealthSuggestion(id) : null;
+  const [step, setStep] = useState<Step>('detail');
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
+  const [note, setNote] = useState('');
 
-  const handleEdit = () => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  // Generate next 7 days
+  const dates = useMemo(() => {
+    const result: { date: string; label: string; dayLabel: string }[] = [];
+    const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const dateStr = d.toISOString().split('T')[0];
+      const month = d.getMonth() + 1;
+      const day = d.getDate();
+      result.push({
+        date: dateStr,
+        label: `${month}/${day}`,
+        dayLabel: i === 0 ? '今天' : i === 1 ? '明天' : `週${dayNames[d.getDay()]}`,
+      });
     }
-    setShowEditModal(true);
-  };
+    return result;
+  }, []);
 
-  const handleSaveEdit = async (updatedPet: Pet) => {
-    try {
-      await updatePet(updatedPet);
-      if (Platform.OS !== "web") {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-      setShowEditModal(false);
-    } catch (error) {
-      Alert.alert("錯誤", "更新失敗");
-    }
-  };
+  // Available time slots
+  const availableSlots = useMemo(() => {
+    if (!selectedStaff || !selectedDate) return [];
+    return getAvailableSlots(id, selectedStaff.id, selectedDate);
+  }, [id, selectedStaff, selectedDate, getAvailableSlots]);
 
-  const handleDelete = () => {
-    Alert.alert(
-      "刪除寵物",
-      `確定要刪除 ${pet?.name} 嗎？此操作無法復原，所有相關的貼文、飲食和醫療紀錄都會被刪除。`,
-      [
-        { text: "取消", style: "cancel" },
-        {
-          text: "刪除",
-          style: "destructive",
-          onPress: async () => {
-            if (id) {
-              await deletePet(id);
-              router.back();
-            }
-          },
-        },
-      ]
-    );
-  };
+  const depositAmount = selectedService ? Math.round(selectedService.price * 0.3) : 0;
 
-  if (!pet) {
+  // Provider reviews
+  const providerReviews = state.reviews.filter((r) => r.providerId === id);
+
+  if (!provider) {
     return (
-      <ScreenContainer edges={["top", "left", "right", "bottom"]}>
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-foreground">找不到寵物資料</Text>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="mt-4 bg-primary px-4 py-2 rounded-full"
-          >
-            <Text className="text-white">返回</Text>
-          </TouchableOpacity>
-        </View>
-      </ScreenContainer>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <Text style={{ fontSize: 16, color: colors.muted }}>找不到該店家</Text>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16 }}>
+          <Text style={{ fontSize: 14, color: colors.primary }}>返回</Text>
+        </TouchableOpacity>
+      </View>
     );
   }
 
-  const age = pet.birthDate
-    ? Math.floor(
-        (new Date().getTime() - new Date(pet.birthDate).getTime()) /
-          (365.25 * 24 * 60 * 60 * 1000)
-      )
-    : null;
+  const handleConfirmBooking = () => {
+    if (!selectedService || !selectedStaff || !selectedDate || !selectedTime) return;
+
+    createBooking({
+      providerId: provider.id,
+      providerName: provider.name,
+      serviceId: selectedService.id,
+      serviceName: selectedService.name,
+      staffId: selectedStaff.id,
+      staffName: selectedStaff.name,
+      date: selectedDate,
+      time: selectedTime,
+      duration: selectedService.duration,
+      totalPrice: selectedService.price,
+      depositAmount,
+      depositPaid: true,
+      status: 'confirmed',
+      note,
+    });
+
+    const msg = `預約成功！\n\n${provider.name}\n${selectedService.name}\n${selectedDate} ${selectedTime}\n設計師：${selectedStaff.name}\n\n訂金 $${depositAmount} 已付款`;
+    if (Platform.OS === 'web') {
+      alert(msg);
+    } else {
+      Alert.alert('預約成功', msg);
+    }
+
+    router.back();
+  };
+
+  const goBack = () => {
+    if (step === 'detail') {
+      router.back();
+    } else if (step === 'select-service') {
+      setStep('detail');
+    } else if (step === 'select-staff') {
+      setStep('select-service');
+    } else if (step === 'select-time') {
+      setStep('select-staff');
+    } else if (step === 'confirm') {
+      setStep('select-time');
+    }
+  };
+
+  const stepTitles: Record<Step, string> = {
+    detail: provider.name,
+    'select-service': '選擇服務',
+    'select-staff': '選擇設計師',
+    'select-time': '選擇時段',
+    confirm: '確認預約',
+  };
 
   return (
-    <ScreenContainer edges={["top", "left", "right", "bottom"]}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
-        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-          <IconSymbol name="chevron.left" size={24} color={colors.foreground} />
-        </TouchableOpacity>
-        <Text className="text-lg font-semibold text-foreground">{pet.name}</Text>
-        <TouchableOpacity onPress={handleEdit} activeOpacity={0.7}>
-          <IconSymbol name="pencil" size={22} color={colors.primary} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Pet Photo */}
-        <View className="items-center py-6">
-          <View className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20">
-            {pet.photoUri ? (
-              <Image source={{ uri: pet.photoUri }} style={{ width: "100%", height: "100%" }} />
-            ) : (
-              <View className="w-full h-full bg-primary/10 items-center justify-center">
-                <IconSymbol name="pawprint.fill" size={48} color={colors.primary} />
-              </View>
-            )}
-          </View>
-          <Text className="text-2xl font-bold text-foreground mt-4">{pet.name}</Text>
-          <Text className="text-muted">
-            {SPECIES_LABELS[pet.species]} {pet.breed && `· ${pet.breed}`}
+      <View style={{
+        paddingTop: Platform.OS === 'web' ? 16 : insets.top + 4,
+        paddingHorizontal: 20,
+        paddingBottom: 12,
+        backgroundColor: colors.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={goBack} style={{ marginRight: 12, padding: 4 }}>
+            <Text style={{ fontSize: 16, color: colors.foreground }}>←</Text>
+          </TouchableOpacity>
+          <Text style={{ fontSize: 18, fontWeight: '600', color: colors.foreground }}>
+            {stepTitles[step]}
           </Text>
         </View>
+      </View>
 
-        {/* Quick Stats */}
-        <View className="flex-row mx-4 mb-6">
-          <View className="flex-1 bg-surface rounded-xl p-4 mr-2 items-center border border-border">
-            <Text className="text-2xl font-bold text-primary">{pet.weight}</Text>
-            <Text className="text-muted text-sm">公斤</Text>
-          </View>
-          <View className="flex-1 bg-surface rounded-xl p-4 mx-1 items-center border border-border">
-            <Text className="text-2xl font-bold text-secondary">
-              {age !== null ? age : "-"}
+      <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+        {/* ── Step: Provider Detail ── */}
+        {step === 'detail' && (
+          <View style={{ padding: 20 }}>
+            {/* Provider Info */}
+            <View style={{ marginBottom: 20 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                <Text style={{ fontSize: 13, color: colors.muted }}>
+                  {SERVICE_CATEGORY_LABELS[provider.category]} · {provider.city} {provider.district}
+                </Text>
+                {provider.isVerified && (
+                  <View style={{
+                    marginLeft: 8,
+                    backgroundColor: colors.primary,
+                    borderRadius: 4,
+                    paddingHorizontal: 5,
+                    paddingVertical: 1,
+                  }}>
+                    <Text style={{ fontSize: 10, color: colors.surface, fontWeight: '600' }}>認證</Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                <Text style={{ fontSize: 14, color: '#F5A623', marginRight: 3 }}>★</Text>
+                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.foreground }}>
+                  {provider.rating}
+                </Text>
+                <Text style={{ fontSize: 13, color: colors.muted, marginLeft: 4 }}>
+                  {provider.reviewCount} 則評價
+                </Text>
+              </View>
+
+              <Text style={{ fontSize: 14, color: colors.foreground, lineHeight: 22 }}>
+                {provider.description}
+              </Text>
+            </View>
+
+            {/* Contact & Address */}
+            <View style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: colors.border,
+              padding: 14,
+              marginBottom: 20,
+            }}>
+              <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                <Text style={{ fontSize: 13, color: colors.muted, width: 50 }}>地址</Text>
+                <Text style={{ fontSize: 13, color: colors.foreground, flex: 1 }}>{provider.address}</Text>
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ fontSize: 13, color: colors.muted, width: 50 }}>電話</Text>
+                <Text style={{ fontSize: 13, color: colors.foreground }}>{provider.phone}</Text>
+              </View>
+            </View>
+
+            {/* Services Preview */}
+            <Text style={{ fontSize: 16, fontWeight: '600', color: colors.foreground, marginBottom: 10 }}>
+              服務項目
             </Text>
-            <Text className="text-muted text-sm">歲</Text>
-          </View>
-          <View className="flex-1 bg-surface rounded-xl p-4 ml-2 items-center border border-border">
-            <Text className="text-2xl font-bold text-success">{medicalRecords.length}</Text>
-            <Text className="text-muted text-sm">醫療紀錄</Text>
-          </View>
-        </View>
+            {provider.services.map((service) => (
+              <View
+                key={service.id}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  padding: 14,
+                  marginBottom: 8,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 15, fontWeight: '500', color: colors.foreground }}>
+                    {service.name}
+                  </Text>
+                  <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>
+                    {service.description} · {service.duration}分鐘
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.foreground }}>
+                  ${service.price}
+                </Text>
+              </View>
+            ))}
 
-        {/* Today's Health */}
-        {healthSuggestion && (
-          <View className="mx-4 mb-6 bg-surface rounded-xl p-4 border border-border">
-            <Text className="text-foreground font-semibold mb-3">今日健康狀態</Text>
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-muted">今日攝取熱量</Text>
-              <Text className="text-foreground font-medium">
-                {healthSuggestion.currentCalories} / {healthSuggestion.dailyCalories} kcal
-              </Text>
+            {/* Staff */}
+            <Text style={{ fontSize: 16, fontWeight: '600', color: colors.foreground, marginTop: 16, marginBottom: 10 }}>
+              服務人員
+            </Text>
+            {provider.staffMembers.map((staff) => (
+              <View
+                key={staff.id}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  padding: 14,
+                  marginBottom: 8,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <View style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.background,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginRight: 12,
+                }}>
+                  <Text style={{ fontSize: 16 }}>👤</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 15, fontWeight: '500', color: colors.foreground }}>
+                    {staff.name}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>
+                    {staff.title} · ★ {staff.rating} ({staff.reviewCount})
+                  </Text>
+                  <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
+                    {staff.specialties.join('、')}
+                  </Text>
+                </View>
+              </View>
+            ))}
+
+            {/* Reviews */}
+            {providerReviews.length > 0 && (
+              <>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.foreground, marginTop: 16, marginBottom: 10 }}>
+                  評價
+                </Text>
+                {providerReviews.map((review) => (
+                  <View
+                    key={review.id}
+                    style={{
+                      backgroundColor: colors.surface,
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      padding: 14,
+                      marginBottom: 8,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <Text style={{ fontSize: 13, color: colors.muted }}>
+                        {review.serviceName} · {review.staffName}
+                      </Text>
+                      <Text style={{ fontSize: 13, color: '#F5A623' }}>
+                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 14, color: colors.foreground, lineHeight: 20 }}>
+                      {review.comment}
+                    </Text>
+                  </View>
+                ))}
+              </>
+            )}
+
+            {/* Business Hours */}
+            <Text style={{ fontSize: 16, fontWeight: '600', color: colors.foreground, marginTop: 16, marginBottom: 10 }}>
+              營業時間
+            </Text>
+            <View style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: colors.border,
+              padding: 14,
+            }}>
+              {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((day) => {
+                const labels: Record<string, string> = {
+                  mon: '週一', tue: '週二', wed: '週三', thu: '週四',
+                  fri: '週五', sat: '週六', sun: '週日',
+                };
+                const hours = provider.businessHours[day];
+                return (
+                  <View key={day} style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    paddingVertical: 4,
+                  }}>
+                    <Text style={{ fontSize: 13, color: colors.foreground }}>{labels[day]}</Text>
+                    <Text style={{ fontSize: 13, color: hours ? colors.foreground : colors.error }}>
+                      {hours ? `${hours.open} - ${hours.close}` : '公休'}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-muted">建議運動時間</Text>
-              <Text className="text-foreground font-medium">
-                {healthSuggestion.exerciseMinutes} 分鐘
-              </Text>
-            </View>
+
+            {/* Book Button */}
+            <TouchableOpacity
+              onPress={() => setStep('select-service')}
+              style={{
+                backgroundColor: colors.primary,
+                borderRadius: 10,
+                paddingVertical: 16,
+                alignItems: 'center',
+                marginTop: 24,
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.surface }}>立即預約</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {/* Pet Info */}
-        <View className="mx-4 mb-6 bg-surface rounded-xl px-4 border border-border">
-          <InfoRow label="種類" value={SPECIES_LABELS[pet.species]} />
-          <InfoRow label="品種" value={pet.breed || "未設定"} />
-          <InfoRow label="體重" value={`${pet.weight} kg`} />
-          <InfoRow
-            label="出生日期"
-            value={
-              pet.birthDate
-                ? new Date(pet.birthDate).toLocaleDateString("zh-TW")
-                : "未設定"
-            }
-          />
-          <InfoRow
-            label="建立日期"
-            value={new Date(pet.createdAt).toLocaleDateString("zh-TW")}
-          />
-        </View>
+        {/* ── Step: Select Service ── */}
+        {step === 'select-service' && (
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 16 }}>
+              選擇你想要的服務
+            </Text>
+            {provider.services.filter((s) => s.isAvailable).map((service) => (
+              <TouchableOpacity
+                key={service.id}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setSelectedService(service);
+                  setStep('select-staff');
+                }}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: selectedService?.id === service.id ? colors.primary : colors.border,
+                  padding: 16,
+                  marginBottom: 10,
+                }}
+              >
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 16, fontWeight: '500', color: colors.foreground }}>
+                      {service.name}
+                    </Text>
+                    <Text style={{ fontSize: 13, color: colors.muted, marginTop: 4 }}>
+                      {service.description}
+                    </Text>
+                    <Text style={{ fontSize: 12, color: colors.muted, marginTop: 4 }}>
+                      ⏱ {service.duration} 分鐘
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={{ fontSize: 18, fontWeight: '600', color: colors.foreground }}>
+                      ${service.price}
+                    </Text>
+                    <Text style={{ fontSize: 11, color: colors.muted, marginTop: 2 }}>
+                      訂金 ${Math.round(service.price * 0.3)}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
-        {/* Quick Actions */}
-        <View className="mx-4 mb-6">
-          <Text className="text-foreground font-semibold mb-3">快速操作</Text>
-          <View className="flex-row gap-3">
+        {/* ── Step: Select Staff ── */}
+        {step === 'select-staff' && (
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 16 }}>
+              選擇服務人員
+            </Text>
+            {provider.staffMembers.map((staff) => (
+              <TouchableOpacity
+                key={staff.id}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setSelectedStaff(staff);
+                  setSelectedDate(dates[0].date);
+                  setStep('select-time');
+                }}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: selectedStaff?.id === staff.id ? colors.primary : colors.border,
+                  padding: 16,
+                  marginBottom: 10,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <View style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: colors.background,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginRight: 14,
+                }}>
+                  <Text style={{ fontSize: 20 }}>👤</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '500', color: colors.foreground }}>
+                    {staff.name}
+                  </Text>
+                  <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>
+                    {staff.title}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
+                    {staff.specialties.join('、')}
+                  </Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 13, color: '#F5A623' }}>★</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '500', color: colors.foreground, marginLeft: 3 }}>
+                      {staff.rating}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 11, color: colors.muted, marginTop: 2 }}>
+                    {staff.reviewCount} 則評價
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* ── Step: Select Time ── */}
+        {step === 'select-time' && (
+          <View style={{ padding: 20 }}>
+            {/* Date Selection */}
+            <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 12 }}>
+              選擇日期
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+              {dates.map((d) => (
+                <TouchableOpacity
+                  key={d.date}
+                  onPress={() => { setSelectedDate(d.date); setSelectedTime(''); }}
+                  style={{
+                    width: 64,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                    backgroundColor: selectedDate === d.date ? colors.primary : colors.surface,
+                    borderWidth: 1,
+                    borderColor: selectedDate === d.date ? colors.primary : colors.border,
+                    marginRight: 8,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{
+                    fontSize: 12,
+                    color: selectedDate === d.date ? colors.surface : colors.muted,
+                    marginBottom: 2,
+                  }}>
+                    {d.dayLabel}
+                  </Text>
+                  <Text style={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    color: selectedDate === d.date ? colors.surface : colors.foreground,
+                  }}>
+                    {d.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {/* Time Selection */}
+            <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 12 }}>
+              選擇時段
+            </Text>
+            {availableSlots.length === 0 ? (
+              <View style={{
+                backgroundColor: colors.surface,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: colors.border,
+                padding: 24,
+                alignItems: 'center',
+              }}>
+                <Text style={{ fontSize: 14, color: colors.muted }}>此日期無可預約時段</Text>
+              </View>
+            ) : (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {availableSlots.filter((s) => s.isAvailable).map((slot) => (
+                  <TouchableOpacity
+                    key={slot.id}
+                    onPress={() => setSelectedTime(slot.time)}
+                    style={{
+                      paddingHorizontal: 18,
+                      paddingVertical: 10,
+                      borderRadius: 8,
+                      backgroundColor: selectedTime === slot.time ? colors.primary : colors.surface,
+                      borderWidth: 1,
+                      borderColor: selectedTime === slot.time ? colors.primary : colors.border,
+                    }}
+                  >
+                    <Text style={{
+                      fontSize: 14,
+                      fontWeight: '500',
+                      color: selectedTime === slot.time ? colors.surface : colors.foreground,
+                    }}>
+                      {slot.time}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Next */}
+            {selectedTime && (
+              <TouchableOpacity
+                onPress={() => setStep('confirm')}
+                style={{
+                  backgroundColor: colors.primary,
+                  borderRadius: 10,
+                  paddingVertical: 16,
+                  alignItems: 'center',
+                  marginTop: 24,
+                }}
+              >
+                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.surface }}>
+                  下一步
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        {/* ── Step: Confirm ── */}
+        {step === 'confirm' && selectedService && selectedStaff && (
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 16 }}>
+              請確認以下預約資訊
+            </Text>
+
+            <View style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: colors.border,
+              padding: 16,
+              marginBottom: 16,
+            }}>
+              {[
+                { label: '店家', value: provider.name },
+                { label: '服務', value: selectedService.name },
+                { label: '設計師', value: selectedStaff.name },
+                { label: '日期', value: selectedDate },
+                { label: '時間', value: selectedTime },
+                { label: '時長', value: `${selectedService.duration} 分鐘` },
+              ].map((row) => (
+                <View key={row.label} style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  paddingVertical: 8,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.border,
+                }}>
+                  <Text style={{ fontSize: 14, color: colors.muted }}>{row.label}</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '500', color: colors.foreground }}>{row.value}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Note */}
+            <Text style={{ fontSize: 14, fontWeight: '500', color: colors.foreground, marginBottom: 6 }}>
+              備註（選填）
+            </Text>
+            <TextInput
+              value={note}
+              onChangeText={setNote}
+              placeholder="例如：想要自然風格的造型"
+              placeholderTextColor={colors.muted}
+              multiline
+              style={{
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: 8,
+                paddingHorizontal: 14,
+                paddingVertical: 12,
+                fontSize: 14,
+                color: colors.foreground,
+                height: 70,
+                textAlignVertical: 'top',
+                marginBottom: 20,
+                ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+              } as any}
+            />
+
+            {/* Price Summary */}
+            <View style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: colors.border,
+              padding: 16,
+              marginBottom: 20,
+            }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                <Text style={{ fontSize: 14, color: colors.foreground }}>服務金額</Text>
+                <Text style={{ fontSize: 14, color: colors.foreground }}>${selectedService.price}</Text>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                <Text style={{ fontSize: 14, color: colors.foreground }}>訂金（30%）</Text>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.primary }}>${depositAmount}</Text>
+              </View>
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingTop: 8,
+                borderTopWidth: 1,
+                borderTopColor: colors.border,
+              }}>
+                <Text style={{ fontSize: 14, color: colors.muted }}>到店再付</Text>
+                <Text style={{ fontSize: 14, color: colors.muted }}>${selectedService.price - depositAmount}</Text>
+              </View>
+            </View>
+
+            {/* Payment Note */}
+            <View style={{
+              backgroundColor: colors.background,
+              borderRadius: 8,
+              padding: 12,
+              marginBottom: 20,
+            }}>
+              <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 18 }}>
+                ⓘ 預約成功後將收取 30% 訂金。取消政策：24小時前免費取消，24小時內取消將扣除訂金。
+              </Text>
+            </View>
+
+            {/* Confirm Button */}
             <TouchableOpacity
-              onPress={() => router.push(`/medical-records/${pet.id}` as any)}
-              className="flex-1 bg-primary/10 rounded-xl p-4 items-center"
-              activeOpacity={0.7}
+              onPress={handleConfirmBooking}
+              style={{
+                backgroundColor: colors.primary,
+                borderRadius: 10,
+                paddingVertical: 16,
+                alignItems: 'center',
+              }}
             >
-              <IconSymbol name="cross.case.fill" size={24} color={colors.primary} />
-              <Text className="text-primary font-medium mt-2">醫療紀錄</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push(`/meal-log?petId=${pet.id}` as any)}
-              className="flex-1 bg-secondary/10 rounded-xl p-4 items-center"
-              activeOpacity={0.7}
-            >
-              <IconSymbol name="fork.knife" size={24} color={colors.secondary} />
-              <Text className="text-secondary font-medium mt-2">記錄飲食</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.surface }}>
+                確認預約並付訂金 ${depositAmount}
+              </Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Delete Button */}
-        <View className="mx-4 mb-8">
-          <TouchableOpacity
-            onPress={handleDelete}
-            className="bg-error/10 rounded-xl p-4 items-center"
-            activeOpacity={0.7}
-          >
-            <Text className="text-error font-medium">刪除寵物</Text>
-          </TouchableOpacity>
-        </View>
+        )}
       </ScrollView>
-
-      {/* Edit Modal */}
-      {pet && (
-        <EditPetModal
-          visible={showEditModal}
-          pet={pet}
-          onClose={() => setShowEditModal(false)}
-          onSave={handleSaveEdit}
-        />
-      )}
-    </ScreenContainer>
+    </View>
   );
 }

@@ -2,21 +2,14 @@
 import "./scripts/load-env.js";
 import type { ExpoConfig } from "expo/config";
 
-// Bundle ID format: space.manus.<project_name_dots>.<timestamp>
-// e.g., "my-app" created at 2024-01-15 10:30:45 -> "space.manus.my.app.t20240115103045"
 const bundleId = "space.manus.pet.social.app.t20260112024541";
-// Extract timestamp from bundle ID and prefix with "manus" for deep link scheme
-// e.g., "space.manus.my.app.t20240115103045" -> "manus20240115103045"
 const timestamp = bundleId.split(".").pop()?.replace(/^t/, "") ?? "";
 const schemeFromBundleId = `manus${timestamp}`;
 
 const env = {
-  // App branding - update these values directly (do not use env vars)
-  appName: "PetLife 寵物社交",
-  appSlug: "pet-social-app",
-  // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
-  // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663276694301/MNZLlaQrgbyUJgRt.png",
+  appName: "BeautyBook 美容預約",
+  appSlug: "beauty-booking-app",
+  logoUrl: "",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -37,7 +30,7 @@ const config: ExpoConfig = {
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
+      backgroundColor: "#FAFAF8",
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundImage: "./assets/images/android-icon-background.png",
       monochromeImage: "./assets/images/android-icon-monochrome.png",
@@ -50,12 +43,7 @@ const config: ExpoConfig = {
       {
         action: "VIEW",
         autoVerify: true,
-        data: [
-          {
-            scheme: env.scheme,
-            host: "*",
-          },
-        ],
+        data: [{ scheme: env.scheme, host: "*" }],
         category: ["BROWSABLE", "DEFAULT"],
       },
     ],
@@ -69,16 +57,11 @@ const config: ExpoConfig = {
     "expo-router",
     [
       "expo-audio",
-      {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
-      },
+      { microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone." },
     ],
     [
       "expo-video",
-      {
-        supportsBackgroundPlayback: true,
-        supportsPictureInPicture: true,
-      },
+      { supportsBackgroundPlayback: true, supportsPictureInPicture: true },
     ],
     [
       "expo-splash-screen",
@@ -86,19 +69,13 @@ const config: ExpoConfig = {
         image: "./assets/images/splash-icon.png",
         imageWidth: 200,
         resizeMode: "contain",
-        backgroundColor: "#ffffff",
-        dark: {
-          backgroundColor: "#000000",
-        },
+        backgroundColor: "#FAFAF8",
+        dark: { backgroundColor: "#121212" },
       },
     ],
     [
       "expo-build-properties",
-      {
-        android: {
-          buildArchs: ["armeabi-v7a", "arm64-v8a"],
-        },
-      },
+      { android: { buildArchs: ["armeabi-v7a", "arm64-v8a"] } },
     ],
   ],
   experiments: {

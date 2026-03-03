@@ -1,5 +1,3 @@
-// Fallback for using MaterialIcons on Android and web.
-
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { SymbolWeight, SymbolViewProps } from "expo-symbols";
 import { ComponentProps } from "react";
@@ -8,48 +6,52 @@ import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
 type IconMapping = Record<SymbolViewProps["name"], ComponentProps<typeof MaterialIcons>["name"]>;
 type IconSymbolName = keyof typeof MAPPING;
 
-/**
- * Add your SF Symbols to Material Icons mappings here.
- */
 const MAPPING = {
   // Tab icons
   "house.fill": "home",
-  "pawprint.fill": "pets",
-  "heart.fill": "favorite",
+  "calendar": "calendar-today",
+  "storefront.fill": "storefront",
   "person.fill": "person",
-  // Navigation icons
-  "plus": "add",
-  "plus.circle.fill": "add-circle",
-  "camera.fill": "camera-alt",
-  "photo.fill": "photo",
-  "xmark": "close",
+  // Navigation
   "chevron.left": "chevron-left",
   "chevron.right": "chevron-right",
   "chevron.down": "expand-more",
-  // Action icons
+  "xmark": "close",
+  "plus": "add",
+  "plus.circle.fill": "add-circle",
+  // Search & filter
+  "magnifyingglass": "search",
+  "slider.horizontal.3": "tune",
+  "mappin.and.ellipse": "place",
+  "map.fill": "map",
+  // Actions
   "heart": "favorite-border",
-  "bubble.left": "chat-bubble-outline",
-  "paperplane.fill": "send",
-  "trash.fill": "delete",
-  "pencil": "edit",
+  "heart.fill": "favorite",
+  "star.fill": "star",
+  "star": "star-border",
   "checkmark": "check",
-  // Feature icons
-  "fork.knife": "restaurant",
-  "cross.case.fill": "medical-services",
-  "calendar": "calendar-today",
+  "checkmark.circle.fill": "check-circle",
+  "clock": "schedule",
+  "clock.fill": "schedule",
+  "phone.fill": "phone",
+  "pencil": "edit",
+  "trash.fill": "delete",
+  // Business
+  "dollarsign.circle": "attach-money",
+  "creditcard.fill": "credit-card",
   "bell.fill": "notifications",
   "gearshape.fill": "settings",
   "info.circle": "info",
-  // Pet world icons
-  "tree.fill": "park",
-  "house": "home",
-  "sun.max.fill": "wb-sunny",
-  "moon.fill": "nightlight",
+  "questionmark.circle": "help",
+  "arrow.right": "arrow-forward",
+  "arrow.left": "arrow-back",
+  // Content
+  "camera.fill": "camera-alt",
+  "photo.fill": "photo",
+  "paperplane.fill": "send",
+  "bubble.left": "chat-bubble-outline",
 } as IconMapping;
 
-/**
- * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
- */
 export function IconSymbol({
   name,
   size = 24,
