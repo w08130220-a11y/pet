@@ -50,19 +50,11 @@ const config: ExpoConfig = {
   },
   web: {
     bundler: "metro",
-    output: "static",
+    output: "single",
     favicon: "./assets/images/favicon.png",
   },
   plugins: [
     "expo-router",
-    [
-      "expo-audio",
-      { microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone." },
-    ],
-    [
-      "expo-video",
-      { supportsBackgroundPlayback: true, supportsPictureInPicture: true },
-    ],
     [
       "expo-splash-screen",
       {
@@ -80,7 +72,7 @@ const config: ExpoConfig = {
   ],
   experiments: {
     typedRoutes: true,
-    reactCompiler: true,
+    reactCompiler: false,
   },
 };
 
