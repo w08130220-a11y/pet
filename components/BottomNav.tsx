@@ -5,16 +5,19 @@ import { usePathname } from 'next/navigation';
 
 const tabs = [
   { href: '/', label: '探索', icon: '🔍' },
+  { href: '/matching', label: '媒合', icon: '🤖' },
   { href: '/bookings', label: '預約', icon: '📅' },
-  { href: '/manage', label: '業者中心', icon: '🏪' },
+  { href: '/chat', label: '訊息', icon: '💬' },
+  { href: '/manage', label: '業者', icon: '🏪' },
   { href: '/profile', label: '我的', icon: '👤' },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
 
-  // Hide on provider detail pages
+  // Hide on provider detail and chat room pages
   if (pathname.startsWith('/provider/')) return null;
+  if (pathname.match(/^\/chat\/.+/)) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border z-50">

@@ -5,10 +5,10 @@ import { useAppStore } from '@/lib/store';
 import { SERVICE_CATEGORY_LABELS, SERVICE_CATEGORY_ICONS, BOOKING_STATUS_LABELS, CITIES, type ServiceCategory } from '@/lib/types';
 
 const CATEGORIES: ServiceCategory[] = ['nail', 'hair', 'massage', 'lash', 'spa', 'tattoo'];
-type ManageTab = 'overview' | 'services' | 'staff' | 'schedule' | 'orders' | 'photos';
+type ManageTab = 'overview' | 'services' | 'staff' | 'schedule' | 'orders' | 'photos' | 'portfolio' | 'chat';
 
 export default function ManagePage() {
-  const { state, dispatch, providerCancelBooking } = useAppStore();
+  const { state, dispatch, providerCancelBooking, addPortfolioItem, deletePortfolioItem } = useAppStore();
   const [activeTab, setActiveTab] = useState<ManageTab>('overview');
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -27,6 +27,9 @@ export default function ManagePage() {
 
   const [showAddStaff, setShowAddStaff] = useState(false);
   const [staffForm, setStaffForm] = useState({ name: '', title: '', specialties: '' });
+
+  const [showAddPortfolio, setShowAddPortfolio] = useState(false);
+  const [portfolioForm, setPortfolioForm] = useState({ title: '', description: '', staffId: '' });
 
   const isProvider = state.userRole === 'provider';
   const myProvider = isProvider ? state.providers[0] : null;
@@ -214,10 +217,38 @@ export default function ManagePage() {
   }
 
   // ── Provider Dashboard ──
+  const myPortfolio = myProvider ? state.portfolioItems.filter((p) => p.providerId === myProvider.id) : [];
+  const myReports = myProvider ? state.portfolioReports.filter((r) => {
+    const item = state.portfolioItems.find((p) => p.id === r.portfolioItemId);
+    return item?.providerId === myProvider.id;
+  }) : [];
+  const myChatRooms = myProvider
+    ? state.chatRooms.filter((r) => r.providerId === myProvider.id)
+    : [];
+
+  const handleAddPortfolio = () => {
+    if (!myProvider || !portfolioForm.title.trim()) {
+      alert('請填寫作品標題'); return;
+    }
+    const staff = myProvider.staffMembers.find((s) => s.id === portfolioForm.staffId) || myProvider.staffMembers[0];
+    addPortfolioItem({
+      providerId: myProvider.id,
+      staffId: staff?.id || '',
+      staffName: staff?.name || '',
+      title: portfolioForm.title,
+      description: portfolioForm.description,
+      imageUrl: '',
+      category: myProvider.category,
+    });
+    setPortfolioForm({ title: '', description: '', staffId: '' });
+    setShowAddPortfolio(false);
+  };
+
   const tabs: { key: ManageTab; label: string }[] = [
     { key: 'overview', label: '總覽' }, { key: 'orders', label: '訂單' },
     { key: 'services', label: '服務' }, { key: 'staff', label: '人員' },
-    { key: 'photos', label: '相簿' }, { key: 'schedule', label: '時段' },
+    { key: 'portfolio', label: '作品集' }, { key: 'photos', label: '相簿' },
+    { key: 'chat', label: '訊息' }, { key: 'schedule', label: '時段' },
   ];
 
   return (
@@ -429,6 +460,130 @@ export default function ManagePage() {
                 </div>
               )}
             </div>
+          </>
+        )}
+
+        {/* Portfolio */}
+        {activeTab === 'portfolio' && myProvider && (
+          <>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[13px] text-muted">{myPortfolio.length} 件作品</span>
+              <button onClick={() => setShowAddPortfolio(!showAddPortfolio)}
+                className="bg-primary rounded-lg px-3.5 py-2 text-[13px] font-semibold text-surface">
+                + 上傳作品
+              </button>
+            </div>
+
+            {myReports.length > 0 && (
+              <div className="bg-orange-50 border border-orange-300 rounded-xl p-3 mb-3">
+                <p className="text-[13px] text-orange-900 font-medium">⚠ 有 {myReports.length} 件作品被檢舉</p>
+                <p className="text-xs text-orange-800 mt-0.5">
+                  請確認作品為原創，竊取他人作品將導致帳號被列入黑名單。
+                </p>
+              </div>
+            )}
+
+            {showAddPortfolio && (
+              <div className="bg-surface rounded-xl border-2 border-primary p-4 mb-3">
+                <h3 className="text-[15px] font-semibold text-foreground mb-3">上傳作品</h3>
+                <input
+                  value={portfolioForm.title}
+                  onChange={(e) => setPortfolioForm({ ...portfolioForm, title: e.target.value })}
+                  placeholder="作品標題 *"
+                  className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5"
+                />
+                <textarea
+                  value={portfolioForm.description}
+                  onChange={(e) => setPortfolioForm({ ...portfolioForm, description: e.target.value })}
+                  placeholder="作品描述"
+                  rows={2}
+                  className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5 resize-none"
+                />
+                {myProvider.staffMembers.length > 0 && (
+                  <select
+                    value={portfolioForm.staffId}
+                    onChange={(e) => setPortfolioForm({ ...portfolioForm, staffId: e.target.value })}
+                    className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground mb-2.5"
+                  >
+                    <option value="">選擇設計師</option>
+                    {myProvider.staffMembers.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name} - {s.title}</option>
+                    ))}
+                  </select>
+                )}
+                <div className="w-full h-[120px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center mb-2.5 cursor-pointer bg-background">
+                  <span className="text-[28px] text-muted">📷</span>
+                  <span className="text-xs text-muted mt-1">點擊上傳作品照片</span>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleAddPortfolio} className="flex-1 bg-primary rounded-lg py-3 text-sm font-semibold text-surface">確認上傳</button>
+                  <button onClick={() => setShowAddPortfolio(false)} className="flex-1 rounded-lg border border-border py-3 text-sm text-muted">取消</button>
+                </div>
+              </div>
+            )}
+
+            {myPortfolio.length === 0 ? (
+              <div className="bg-surface rounded-xl border border-border p-8 text-center">
+                <div className="text-[40px] mb-2">🎨</div>
+                <p className="text-sm text-muted">還沒有上傳作品</p>
+                <p className="text-xs text-muted mt-1">上傳作品展示您的專業技術</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2.5">
+                {myPortfolio.map((item) => (
+                  <div key={item.id} className="bg-surface rounded-xl border border-border overflow-hidden">
+                    <div className="w-full h-[100px] bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <span className="text-2xl">🎨</span>
+                    </div>
+                    <div className="p-2.5">
+                      <p className="text-[13px] font-medium text-foreground truncate">{item.title}</p>
+                      <p className="text-[11px] text-muted truncate">{item.staffName}</p>
+                      <button
+                        onClick={() => {
+                          if (confirm('確定要刪除此作品嗎？')) deletePortfolioItem(item.id);
+                        }}
+                        className="text-[11px] text-error mt-1"
+                      >
+                        刪除
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Chat (Provider view) */}
+        {activeTab === 'chat' && myProvider && (
+          <>
+            <p className="text-[13px] text-muted mb-3">{myChatRooms.length} 則對話</p>
+            {myChatRooms.length === 0 ? (
+              <div className="bg-surface rounded-xl border border-border p-8 text-center">
+                <div className="text-[40px] mb-2">💬</div>
+                <p className="text-sm text-muted">還沒有客戶訊息</p>
+              </div>
+            ) : (
+              myChatRooms.map((room) => {
+                const unread = room.unreadCount > 0;
+                return (
+                  <div key={room.id} className="bg-surface rounded-xl border border-border p-3.5 mb-2 flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                      <span className="text-base">👤</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-medium text-foreground">顧客</p>
+                      <p className="text-[13px] text-muted truncate">{room.lastMessage || '新對話'}</p>
+                    </div>
+                    {unread && (
+                      <span className="bg-primary text-surface text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {room.unreadCount}
+                      </span>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </>
         )}
 

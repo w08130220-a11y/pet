@@ -115,6 +115,87 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
   provider_cancelled: '商家取消',
 };
 
+// ── Matching Request (智能媒合) ──
+export type MatchingStatus = 'open' | 'matched' | 'expired' | 'cancelled';
+
+export interface MatchingRequest {
+  id: string;
+  customerId: string;
+  category: ServiceCategory;
+  city: string;
+  district: string;
+  budget: string;
+  description: string;
+  preferredDate: string;
+  preferredTime: string;
+  status: MatchingStatus;
+  responses: MatchingResponse[];
+  createdAt: string;
+}
+
+export interface MatchingResponse {
+  id: string;
+  requestId: string;
+  providerId: string;
+  providerName: string;
+  staffId: string;
+  staffName: string;
+  message: string;
+  price: number;
+  availableDate: string;
+  availableTime: string;
+  createdAt: string;
+}
+
+export const MATCHING_STATUS_LABELS: Record<MatchingStatus, string> = {
+  open: '等待回覆',
+  matched: '已媒合',
+  expired: '已過期',
+  cancelled: '已取消',
+};
+
+// ── Chat (聊天室) ──
+export interface ChatRoom {
+  id: string;
+  customerId: string;
+  providerId: string;
+  providerName: string;
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  roomId: string;
+  senderId: string;
+  senderRole: 'customer' | 'provider';
+  content: string;
+  createdAt: string;
+}
+
+// ── Portfolio (作品集) ──
+export interface PortfolioItem {
+  id: string;
+  providerId: string;
+  staffId: string;
+  staffName: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: ServiceCategory;
+  createdAt: string;
+}
+
+export interface PortfolioReport {
+  id: string;
+  portfolioItemId: string;
+  reporterId: string;
+  reason: string;
+  status: 'pending' | 'reviewed' | 'confirmed';
+  createdAt: string;
+}
+
 export const CITIES = [
   '台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市',
   '基隆市', '新竹市', '嘉義市', '新竹縣', '苗栗縣', '彰化縣',

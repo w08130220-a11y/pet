@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { SERVICE_CATEGORY_LABELS, type Service, type StaffMember } from '@/lib/types';
 
+type ReportTarget = { itemId: string; title: string } | null;
+
 type Step = 'detail' | 'select-service' | 'select-staff' | 'select-time' | 'confirm';
 
 function ThumbsRating({ rating, size = 14 }: { rating: number; size?: number }) {
@@ -21,7 +23,7 @@ export default function ProviderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const { getProvider, getAvailableSlots, createBooking, state, toggleFavorite, isFavorite } = useAppStore();
+  const { getProvider, getAvailableSlots, createBooking, state, toggleFavorite, isFavorite, getOrCreateChatRoom, reportPortfolio } = useAppStore();
 
   const provider = getProvider(id);
 
@@ -32,8 +34,11 @@ export default function ProviderDetailPage() {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [note, setNote] = useState('');
   const [showDepositDisclaimer, setShowDepositDisclaimer] = useState(false);
+  const [reportTarget, setReportTarget] = useState<ReportTarget>(null);
+  const [reportReason, setReportReason] = useState('');
 
   const favorited = isFavorite(id);
+  const portfolioItems = state.portfolioItems.filter((p) => p.providerId === id);
 
   const dates = useMemo(() => {
     const result: { date: string; label: string; dayLabel: string }[] = [];
@@ -239,6 +244,83 @@ export default function ProviderDetailPage() {
                   </div>
                 ))}
               </>
+            )}
+
+            {/* Portfolio */}
+            {portfolioItems.length > 0 && (
+              <>
+                <h3 className="text-base font-semibold text-foreground mt-4 mb-2.5">作品集</h3>
+                <div className="flex overflow-x-auto hide-scrollbar gap-2.5 mb-2">
+                  {portfolioItems.map((item) => (
+                    <div key={item.id} className="shrink-0 w-[160px] bg-surface rounded-xl border border-border overflow-hidden">
+                      <div className="w-full h-[120px] bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                        <span className="text-3xl">🎨</span>
+                      </div>
+                      <div className="p-2.5">
+                        <p className="text-[13px] font-medium text-foreground truncate">{item.title}</p>
+                        <p className="text-[11px] text-muted truncate">{item.staffName}</p>
+                        <p className="text-[11px] text-muted truncate mt-0.5">{item.description}</p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setReportTarget({ itemId: item.id, title: item.title }); }}
+                          className="text-[11px] text-error mt-1"
+                        >
+                          檢舉作品
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Chat Button */}
+            <button
+              onClick={() => {
+                const roomId = getOrCreateChatRoom(provider.id, provider.name);
+                router.push(`/chat/${roomId}`);
+              }}
+              className="w-full rounded-xl border-2 border-primary py-3.5 mt-4 text-[15px] font-semibold text-primary flex items-center justify-center gap-2"
+            >
+              💬 與店家聊天
+            </button>
+
+            {/* Report Modal */}
+            {reportTarget && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8">
+                <div className="bg-surface rounded-2xl p-6 max-w-[340px] w-full">
+                  <h3 className="text-lg font-bold text-foreground mb-2">檢舉作品</h3>
+                  <p className="text-sm text-muted mb-3">檢舉「{reportTarget.title}」</p>
+                  <select
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="w-full bg-background border border-border rounded-lg px-3.5 py-3 text-sm text-foreground mb-3"
+                  >
+                    <option value="">選擇檢舉原因</option>
+                    <option value="盜用他人作品">盜用他人作品</option>
+                    <option value="與實際不符">照片與實際服務不符</option>
+                    <option value="不當內容">不當內容</option>
+                    <option value="其他">其他</option>
+                  </select>
+                  <button
+                    onClick={() => {
+                      if (!reportReason) { alert('請選擇檢舉原因'); return; }
+                      reportPortfolio(reportTarget.itemId, reportReason);
+                      alert('檢舉已送出，我們會盡速審查。若確認竊取作品，該商家將立即被列入黑名單。');
+                      setReportTarget(null);
+                      setReportReason('');
+                    }}
+                    className="w-full bg-error rounded-[10px] py-3 text-[15px] font-semibold text-surface mb-2"
+                  >
+                    送出檢舉
+                  </button>
+                  <button
+                    onClick={() => { setReportTarget(null); setReportReason(''); }}
+                    className="w-full py-2.5 text-sm text-muted text-center"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Business Hours */}

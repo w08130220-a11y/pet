@@ -91,7 +91,20 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <div className="pt-5 px-5">
         <h1 className="text-[28px] font-bold text-foreground mb-1">BeautyBook</h1>
-        <p className="text-sm text-muted mb-4">找到你附近最好的美容服務</p>
+        <p className="text-sm text-muted mb-3">找到你附近最好的美容服務</p>
+
+        {/* Booking Mode Toggle */}
+        <div className="flex gap-2 mb-4">
+          <button className="flex-1 rounded-xl border-2 border-primary bg-primary/5 py-2.5 text-center">
+            <span className="text-sm text-primary font-semibold">🔍 自己選擇</span>
+          </button>
+          <button
+            onClick={() => router.push('/matching')}
+            className="flex-1 rounded-xl border border-border py-2.5 text-center"
+          >
+            <span className="text-sm text-foreground font-medium">🤖 智能媒合</span>
+          </button>
+        </div>
 
         {/* Search Bar */}
         <div className="flex items-center bg-surface rounded-[10px] border border-border px-3.5 h-11 mb-4">

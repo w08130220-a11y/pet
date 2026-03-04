@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import type { Provider, Service, StaffMember, Booking, Review, TimeSlot, ServiceCategory } from './types';
+import type { Provider, Service, StaffMember, Booking, Review, TimeSlot, ServiceCategory, MatchingRequest, MatchingResponse, ChatRoom, ChatMessage, PortfolioItem, PortfolioReport } from './types';
 
 // ── State ──
 interface AppState {
@@ -9,6 +9,12 @@ interface AppState {
   bookings: Booking[];
   reviews: Review[];
   favorites: string[];
+  matchingRequests: MatchingRequest[];
+  chatRooms: ChatRoom[];
+  chatMessages: ChatMessage[];
+  portfolioItems: PortfolioItem[];
+  portfolioReports: PortfolioReport[];
+  blacklistedProviders: string[];
   isLoading: boolean;
   searchQuery: string;
   selectedCategory: ServiceCategory | null;
@@ -21,6 +27,12 @@ const initialState: AppState = {
   bookings: [],
   reviews: [],
   favorites: [],
+  matchingRequests: [],
+  chatRooms: [],
+  chatMessages: [],
+  portfolioItems: [],
+  portfolioReports: [],
+  blacklistedProviders: [],
   isLoading: true,
   searchQuery: '',
   selectedCategory: null,
@@ -48,7 +60,17 @@ type Action =
   | { type: 'DELETE_SERVICE'; payload: { providerId: string; serviceId: string } }
   | { type: 'UPDATE_SERVICE'; payload: { providerId: string; serviceId: string; updates: Partial<Service> } }
   | { type: 'ADD_STAFF'; payload: { providerId: string; staff: StaffMember } }
-  | { type: 'DELETE_STAFF'; payload: { providerId: string; staffId: string } };
+  | { type: 'DELETE_STAFF'; payload: { providerId: string; staffId: string } }
+  | { type: 'ADD_MATCHING_REQUEST'; payload: MatchingRequest }
+  | { type: 'UPDATE_MATCHING_REQUEST'; payload: { id: string; updates: Partial<MatchingRequest> } }
+  | { type: 'ADD_MATCHING_RESPONSE'; payload: { requestId: string; response: MatchingResponse } }
+  | { type: 'ADD_CHAT_ROOM'; payload: ChatRoom }
+  | { type: 'ADD_CHAT_MESSAGE'; payload: ChatMessage }
+  | { type: 'UPDATE_CHAT_ROOM'; payload: { id: string; updates: Partial<ChatRoom> } }
+  | { type: 'ADD_PORTFOLIO_ITEM'; payload: PortfolioItem }
+  | { type: 'DELETE_PORTFOLIO_ITEM'; payload: string }
+  | { type: 'ADD_PORTFOLIO_REPORT'; payload: PortfolioReport }
+  | { type: 'BLACKLIST_PROVIDER'; payload: string };
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -152,6 +174,47 @@ function reducer(state: AppState, action: Action): AppState {
       );
       return { ...state, providers };
     }
+    case 'ADD_MATCHING_REQUEST':
+      return { ...state, matchingRequests: [...state.matchingRequests, action.payload] };
+    case 'UPDATE_MATCHING_REQUEST': {
+      const matchingRequests = state.matchingRequests.map((r) =>
+        r.id === action.payload.id ? { ...r, ...action.payload.updates } : r
+      );
+      return { ...state, matchingRequests };
+    }
+    case 'ADD_MATCHING_RESPONSE': {
+      const matchingRequests = state.matchingRequests.map((r) =>
+        r.id === action.payload.requestId
+          ? { ...r, responses: [...r.responses, action.payload.response] }
+          : r
+      );
+      return { ...state, matchingRequests };
+    }
+    case 'ADD_CHAT_ROOM':
+      return { ...state, chatRooms: [...state.chatRooms, action.payload] };
+    case 'ADD_CHAT_MESSAGE': {
+      const msg = action.payload;
+      const chatRooms = state.chatRooms.map((r) =>
+        r.id === msg.roomId
+          ? { ...r, lastMessage: msg.content, lastMessageAt: msg.createdAt, unreadCount: r.unreadCount + 1 }
+          : r
+      );
+      return { ...state, chatMessages: [...state.chatMessages, msg], chatRooms };
+    }
+    case 'UPDATE_CHAT_ROOM': {
+      const chatRooms = state.chatRooms.map((r) =>
+        r.id === action.payload.id ? { ...r, ...action.payload.updates } : r
+      );
+      return { ...state, chatRooms };
+    }
+    case 'ADD_PORTFOLIO_ITEM':
+      return { ...state, portfolioItems: [...state.portfolioItems, action.payload] };
+    case 'DELETE_PORTFOLIO_ITEM':
+      return { ...state, portfolioItems: state.portfolioItems.filter((p) => p.id !== action.payload) };
+    case 'ADD_PORTFOLIO_REPORT':
+      return { ...state, portfolioReports: [...state.portfolioReports, action.payload] };
+    case 'BLACKLIST_PROVIDER':
+      return { ...state, blacklistedProviders: [...state.blacklistedProviders, action.payload] };
     default:
       return state;
   }
@@ -355,7 +418,25 @@ const STORAGE_KEYS = {
   reviews: 'beautybook_reviews',
   role: 'beautybook_role',
   favorites: 'beautybook_favorites',
+  matchingRequests: 'beautybook_matching',
+  chatRooms: 'beautybook_chatrooms',
+  chatMessages: 'beautybook_chatmessages',
+  portfolioItems: 'beautybook_portfolio',
+  portfolioReports: 'beautybook_reports',
+  blacklist: 'beautybook_blacklist',
 };
+
+// ── Mock Portfolio ──
+const MOCK_PORTFOLIO: PortfolioItem[] = [
+  { id: 'pf1', providerId: '1', staffId: 'st1', staffName: '小雅', title: '日式暈染美甲', description: '春季限定櫻花暈染設計', imageUrl: '', category: 'nail', createdAt: '2026-02-20T10:00:00Z' },
+  { id: 'pf2', providerId: '1', staffId: 'st1', staffName: '小雅', title: '法式凝膠美甲', description: '經典法式配色搭配金箔點綴', imageUrl: '', category: 'nail', createdAt: '2026-02-18T10:00:00Z' },
+  { id: 'pf3', providerId: '1', staffId: 'st2', staffName: '小芳', title: '韓系極簡美甲', description: '簡約線條搭配珠光色系', imageUrl: '', category: 'nail', createdAt: '2026-02-15T10:00:00Z' },
+  { id: 'pf4', providerId: '2', staffId: 'st3', staffName: 'Ken', title: '韓系男生剪裁', description: '清爽層次剪搭配自然染色', imageUrl: '', category: 'hair', createdAt: '2026-02-22T10:00:00Z' },
+  { id: 'pf5', providerId: '2', staffId: 'st4', staffName: 'Yuki', title: '日系慵懶捲髮', description: '空氣感燙髮搭配霧面染色', imageUrl: '', category: 'hair', createdAt: '2026-02-20T10:00:00Z' },
+  { id: 'pf6', providerId: '2', staffId: 'st5', staffName: 'Mia', title: '溫柔女神長髮', description: '修復護髮後的光澤直髮', imageUrl: '', category: 'hair', createdAt: '2026-02-19T10:00:00Z' },
+  { id: 'pf7', providerId: '6', staffId: 'st11', staffName: 'Emily', title: '韓式野生霧眉', description: '自然毛流感霧眉設計', imageUrl: '', category: 'tattoo', createdAt: '2026-02-25T10:00:00Z' },
+  { id: 'pf8', providerId: '6', staffId: 'st11', staffName: 'Emily', title: '隱形美瞳線', description: '自然放大雙眼效果', imageUrl: '', category: 'tattoo', createdAt: '2026-02-23T10:00:00Z' },
+];
 
 // ── Context ──
 interface AppContextType {
@@ -370,6 +451,15 @@ interface AppContextType {
   addReview: (review: Omit<Review, 'id' | 'createdAt'>) => void;
   toggleFavorite: (providerId: string) => void;
   isFavorite: (providerId: string) => boolean;
+  createMatchingRequest: (req: Omit<MatchingRequest, 'id' | 'createdAt' | 'responses' | 'status'>) => void;
+  respondToMatching: (requestId: string, response: Omit<MatchingResponse, 'id' | 'createdAt'>) => void;
+  acceptMatching: (requestId: string) => void;
+  sendChatMessage: (roomId: string, content: string, senderRole: 'customer' | 'provider') => void;
+  getOrCreateChatRoom: (providerId: string, providerName: string) => string;
+  addPortfolioItem: (item: Omit<PortfolioItem, 'id' | 'createdAt'>) => void;
+  deletePortfolioItem: (id: string) => void;
+  reportPortfolio: (itemId: string, reason: string) => void;
+  blacklistProvider: (providerId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -383,6 +473,12 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       const reviewsStr = localStorage.getItem(STORAGE_KEYS.reviews);
       const roleStr = localStorage.getItem(STORAGE_KEYS.role);
       const favoritesStr = localStorage.getItem(STORAGE_KEYS.favorites);
+      const matchingStr = localStorage.getItem(STORAGE_KEYS.matchingRequests);
+      const chatRoomsStr = localStorage.getItem(STORAGE_KEYS.chatRooms);
+      const chatMsgsStr = localStorage.getItem(STORAGE_KEYS.chatMessages);
+      const portfolioStr = localStorage.getItem(STORAGE_KEYS.portfolioItems);
+      const reportsStr = localStorage.getItem(STORAGE_KEYS.portfolioReports);
+      const blacklistStr = localStorage.getItem(STORAGE_KEYS.blacklist);
       dispatch({
         type: 'LOAD_DATA',
         payload: {
@@ -390,11 +486,17 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
           bookings: bookingsStr ? JSON.parse(bookingsStr) : [],
           reviews: reviewsStr ? JSON.parse(reviewsStr) : MOCK_REVIEWS,
           favorites: favoritesStr ? JSON.parse(favoritesStr) : [],
+          matchingRequests: matchingStr ? JSON.parse(matchingStr) : [],
+          chatRooms: chatRoomsStr ? JSON.parse(chatRoomsStr) : [],
+          chatMessages: chatMsgsStr ? JSON.parse(chatMsgsStr) : [],
+          portfolioItems: portfolioStr ? JSON.parse(portfolioStr) : MOCK_PORTFOLIO,
+          portfolioReports: reportsStr ? JSON.parse(reportsStr) : [],
+          blacklistedProviders: blacklistStr ? JSON.parse(blacklistStr) : [],
           userRole: (roleStr as 'customer' | 'provider') || 'customer',
         },
       });
     } catch {
-      dispatch({ type: 'LOAD_DATA', payload: { providers: MOCK_PROVIDERS, reviews: MOCK_REVIEWS } });
+      dispatch({ type: 'LOAD_DATA', payload: { providers: MOCK_PROVIDERS, reviews: MOCK_REVIEWS, portfolioItems: MOCK_PORTFOLIO } });
     }
   }, []);
 
@@ -421,6 +523,27 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify(state.favorites));
     }
   }, [state.favorites, state.isLoading]);
+
+  useEffect(() => {
+    if (!state.isLoading) {
+      localStorage.setItem(STORAGE_KEYS.matchingRequests, JSON.stringify(state.matchingRequests));
+    }
+  }, [state.matchingRequests, state.isLoading]);
+
+  useEffect(() => {
+    if (!state.isLoading) {
+      localStorage.setItem(STORAGE_KEYS.chatRooms, JSON.stringify(state.chatRooms));
+      localStorage.setItem(STORAGE_KEYS.chatMessages, JSON.stringify(state.chatMessages));
+    }
+  }, [state.chatRooms, state.chatMessages, state.isLoading]);
+
+  useEffect(() => {
+    if (!state.isLoading) {
+      localStorage.setItem(STORAGE_KEYS.portfolioItems, JSON.stringify(state.portfolioItems));
+      localStorage.setItem(STORAGE_KEYS.portfolioReports, JSON.stringify(state.portfolioReports));
+      localStorage.setItem(STORAGE_KEYS.blacklist, JSON.stringify(state.blacklistedProviders));
+    }
+  }, [state.portfolioItems, state.portfolioReports, state.blacklistedProviders, state.isLoading]);
 
   const getProvider = useCallback(
     (id: string) => state.providers.find((p) => p.id === id),
@@ -529,9 +652,169 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
     [state.favorites]
   );
 
+  const createMatchingRequest = useCallback(
+    (req: Omit<MatchingRequest, 'id' | 'createdAt' | 'responses' | 'status'>) => {
+      const newReq: MatchingRequest = {
+        ...req,
+        id: `mr-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        status: 'open',
+        responses: [],
+        createdAt: new Date().toISOString(),
+      };
+      dispatch({ type: 'ADD_MATCHING_REQUEST', payload: newReq });
+
+      // Simulate provider responses after a short delay
+      setTimeout(() => {
+        const matchingProviders = state.providers.filter(
+          (p) => p.category === req.category && p.city === req.city && !state.blacklistedProviders.includes(p.id)
+        );
+        matchingProviders.slice(0, 3).forEach((provider, i) => {
+          const staff = provider.staffMembers[0];
+          if (!staff) return;
+          setTimeout(() => {
+            const resp: MatchingResponse = {
+              id: `mresp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+              requestId: newReq.id,
+              providerId: provider.id,
+              providerName: provider.name,
+              staffId: staff.id,
+              staffName: staff.name,
+              message: `您好！我是${staff.name}，很樂意為您服務。我們可以在您希望的時間為您安排。`,
+              price: provider.services[0]?.price || 1000,
+              availableDate: req.preferredDate,
+              availableTime: req.preferredTime,
+              createdAt: new Date().toISOString(),
+            };
+            dispatch({ type: 'ADD_MATCHING_RESPONSE', payload: { requestId: newReq.id, response: resp } });
+          }, (i + 1) * 1500);
+        });
+      }, 500);
+    },
+    [state.providers, state.blacklistedProviders]
+  );
+
+  const respondToMatching = useCallback(
+    (requestId: string, response: Omit<MatchingResponse, 'id' | 'createdAt'>) => {
+      const newResp: MatchingResponse = {
+        ...response,
+        id: `mresp-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+      };
+      dispatch({ type: 'ADD_MATCHING_RESPONSE', payload: { requestId, response: newResp } });
+    },
+    []
+  );
+
+  const acceptMatching = useCallback((requestId: string) => {
+    dispatch({ type: 'UPDATE_MATCHING_REQUEST', payload: { id: requestId, updates: { status: 'matched' } } });
+  }, []);
+
+  const sendChatMessage = useCallback(
+    (roomId: string, content: string, senderRole: 'customer' | 'provider') => {
+      const msg: ChatMessage = {
+        id: `cm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        roomId,
+        senderId: senderRole === 'customer' ? 'user' : 'provider',
+        senderRole,
+        content,
+        createdAt: new Date().toISOString(),
+      };
+      dispatch({ type: 'ADD_CHAT_MESSAGE', payload: msg });
+
+      // Simulate auto-reply from provider
+      if (senderRole === 'customer') {
+        setTimeout(() => {
+          const room = state.chatRooms.find((r) => r.id === roomId);
+          const autoReply: ChatMessage = {
+            id: `cm-${Date.now()}-auto`,
+            roomId,
+            senderId: 'provider',
+            senderRole: 'provider',
+            content: `感謝您的訊息！${room?.providerName || '我們'}會盡快回覆您。請問有什麼可以幫您的嗎？`,
+            createdAt: new Date().toISOString(),
+          };
+          dispatch({ type: 'ADD_CHAT_MESSAGE', payload: autoReply });
+        }, 2000);
+      }
+    },
+    [state.chatRooms]
+  );
+
+  const getOrCreateChatRoom = useCallback(
+    (providerId: string, providerName: string): string => {
+      const existing = state.chatRooms.find((r) => r.providerId === providerId);
+      if (existing) return existing.id;
+      const roomId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const room: ChatRoom = {
+        id: roomId,
+        customerId: 'user',
+        providerId,
+        providerName,
+        lastMessage: '',
+        lastMessageAt: new Date().toISOString(),
+        unreadCount: 0,
+      };
+      dispatch({ type: 'ADD_CHAT_ROOM', payload: room });
+      return roomId;
+    },
+    [state.chatRooms]
+  );
+
+  const addPortfolioItem = useCallback(
+    (item: Omit<PortfolioItem, 'id' | 'createdAt'>) => {
+      const newItem: PortfolioItem = {
+        ...item,
+        id: `pf-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        createdAt: new Date().toISOString(),
+      };
+      dispatch({ type: 'ADD_PORTFOLIO_ITEM', payload: newItem });
+    },
+    []
+  );
+
+  const deletePortfolioItem = useCallback((id: string) => {
+    dispatch({ type: 'DELETE_PORTFOLIO_ITEM', payload: id });
+  }, []);
+
+  const reportPortfolio = useCallback(
+    (itemId: string, reason: string) => {
+      const report: PortfolioReport = {
+        id: `rpt-${Date.now()}`,
+        portfolioItemId: itemId,
+        reporterId: 'user',
+        reason,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
+      dispatch({ type: 'ADD_PORTFOLIO_REPORT', payload: report });
+
+      // Auto-detect: if 3+ reports on same item, auto-blacklist
+      const existingReports = state.portfolioReports.filter((r) => r.portfolioItemId === itemId);
+      if (existingReports.length >= 2) {
+        const item = state.portfolioItems.find((p) => p.id === itemId);
+        if (item) {
+          dispatch({ type: 'BLACKLIST_PROVIDER', payload: item.providerId });
+          dispatch({ type: 'DELETE_PORTFOLIO_ITEM', payload: itemId });
+          alert('此作品已被多人檢舉，該商家已被列入黑名單。');
+        }
+      }
+    },
+    [state.portfolioReports, state.portfolioItems]
+  );
+
+  const blacklistProvider = useCallback((providerId: string) => {
+    dispatch({ type: 'BLACKLIST_PROVIDER', payload: providerId });
+  }, []);
+
   return (
     <AppContext.Provider
-      value={{ state, dispatch, getProvider, getFilteredProviders, getAvailableSlots, createBooking, cancelBooking, providerCancelBooking, addReview, toggleFavorite, isFavorite }}
+      value={{
+        state, dispatch, getProvider, getFilteredProviders, getAvailableSlots,
+        createBooking, cancelBooking, providerCancelBooking, addReview, toggleFavorite, isFavorite,
+        createMatchingRequest, respondToMatching, acceptMatching,
+        sendChatMessage, getOrCreateChatRoom,
+        addPortfolioItem, deletePortfolioItem, reportPortfolio, blacklistProvider,
+      }}
     >
       {children}
     </AppContext.Provider>
