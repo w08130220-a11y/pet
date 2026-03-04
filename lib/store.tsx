@@ -1,5 +1,6 @@
+'use client';
+
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Provider, Service, StaffMember, Booking, Review, TimeSlot, ServiceCategory } from './types';
 
 // ── State ──
@@ -7,7 +8,7 @@ interface AppState {
   providers: Provider[];
   bookings: Booking[];
   reviews: Review[];
-  favorites: string[]; // provider IDs
+  favorites: string[];
   isLoading: boolean;
   searchQuery: string;
   selectedCategory: ServiceCategory | null;
@@ -183,12 +184,9 @@ const MOCK_PROVIDERS: Provider[] = [
       { id: 'st2', providerId: '1', name: '小芳', title: '美甲師', photoUri: '', specialties: ['韓式美甲', '法式美甲'], rating: 4.7, reviewCount: 82 },
     ],
     businessHours: {
-      mon: { open: '10:00', close: '20:00' },
-      tue: { open: '10:00', close: '20:00' },
-      wed: { open: '10:00', close: '20:00' },
-      thu: { open: '10:00', close: '20:00' },
-      fri: { open: '10:00', close: '21:00' },
-      sat: { open: '10:00', close: '21:00' },
+      mon: { open: '10:00', close: '20:00' }, tue: { open: '10:00', close: '20:00' },
+      wed: { open: '10:00', close: '20:00' }, thu: { open: '10:00', close: '20:00' },
+      fri: { open: '10:00', close: '21:00' }, sat: { open: '10:00', close: '21:00' },
       sun: { open: '11:00', close: '19:00' },
     },
   },
@@ -218,12 +216,9 @@ const MOCK_PROVIDERS: Provider[] = [
       { id: 'st5', providerId: '2', name: 'Mia', title: '設計師', photoUri: '', specialties: ['女生長髮', '護髮療程'], rating: 4.7, reviewCount: 62 },
     ],
     businessHours: {
-      mon: null,
-      tue: { open: '11:00', close: '20:00' },
-      wed: { open: '11:00', close: '20:00' },
-      thu: { open: '11:00', close: '20:00' },
-      fri: { open: '11:00', close: '21:00' },
-      sat: { open: '10:00', close: '21:00' },
+      mon: null, tue: { open: '11:00', close: '20:00' },
+      wed: { open: '11:00', close: '20:00' }, thu: { open: '11:00', close: '20:00' },
+      fri: { open: '11:00', close: '21:00' }, sat: { open: '10:00', close: '21:00' },
       sun: { open: '10:00', close: '19:00' },
     },
   },
@@ -252,12 +247,9 @@ const MOCK_PROVIDERS: Provider[] = [
       { id: 'st7', providerId: '3', name: 'Nisa', title: '泰式按摩師', photoUri: '', specialties: ['泰式按摩', '精油SPA'], rating: 4.8, reviewCount: 72 },
     ],
     businessHours: {
-      mon: { open: '10:00', close: '22:00' },
-      tue: { open: '10:00', close: '22:00' },
-      wed: { open: '10:00', close: '22:00' },
-      thu: { open: '10:00', close: '22:00' },
-      fri: { open: '10:00', close: '23:00' },
-      sat: { open: '10:00', close: '23:00' },
+      mon: { open: '10:00', close: '22:00' }, tue: { open: '10:00', close: '22:00' },
+      wed: { open: '10:00', close: '22:00' }, thu: { open: '10:00', close: '22:00' },
+      fri: { open: '10:00', close: '23:00' }, sat: { open: '10:00', close: '23:00' },
       sun: { open: '10:00', close: '21:00' },
     },
   },
@@ -284,12 +276,9 @@ const MOCK_PROVIDERS: Provider[] = [
       { id: 'st8', providerId: '4', name: '小璇', title: '美睫師', photoUri: '', specialties: ['自然嫁接', '山茶花睫毛'], rating: 4.6, reviewCount: 97 },
     ],
     businessHours: {
-      mon: { open: '10:00', close: '19:00' },
-      tue: { open: '10:00', close: '19:00' },
-      wed: null,
-      thu: { open: '10:00', close: '19:00' },
-      fri: { open: '10:00', close: '19:00' },
-      sat: { open: '09:00', close: '18:00' },
+      mon: { open: '10:00', close: '19:00' }, tue: { open: '10:00', close: '19:00' },
+      wed: null, thu: { open: '10:00', close: '19:00' },
+      fri: { open: '10:00', close: '19:00' }, sat: { open: '09:00', close: '18:00' },
       sun: { open: '09:00', close: '18:00' },
     },
   },
@@ -317,12 +306,9 @@ const MOCK_PROVIDERS: Provider[] = [
       { id: 'st10', providerId: '5', name: '小婷', title: '美容師', photoUri: '', specialties: ['身體護理', '岩盤浴'], rating: 4.4, reviewCount: 24 },
     ],
     businessHours: {
-      mon: { open: '11:00', close: '21:00' },
-      tue: { open: '11:00', close: '21:00' },
-      wed: { open: '11:00', close: '21:00' },
-      thu: { open: '11:00', close: '21:00' },
-      fri: { open: '11:00', close: '22:00' },
-      sat: { open: '10:00', close: '22:00' },
+      mon: { open: '11:00', close: '21:00' }, tue: { open: '11:00', close: '21:00' },
+      wed: { open: '11:00', close: '21:00' }, thu: { open: '11:00', close: '21:00' },
+      fri: { open: '11:00', close: '22:00' }, sat: { open: '10:00', close: '22:00' },
       sun: null,
     },
   },
@@ -349,12 +335,9 @@ const MOCK_PROVIDERS: Provider[] = [
       { id: 'st11', providerId: '6', name: 'Emily', title: '紋繡總監', photoUri: '', specialties: ['霧眉', '美瞳線', '髮際線'], rating: 4.9, reviewCount: 156 },
     ],
     businessHours: {
-      mon: { open: '10:00', close: '18:00' },
-      tue: { open: '10:00', close: '18:00' },
-      wed: { open: '10:00', close: '18:00' },
-      thu: { open: '10:00', close: '18:00' },
-      fri: { open: '10:00', close: '18:00' },
-      sat: { open: '10:00', close: '17:00' },
+      mon: { open: '10:00', close: '18:00' }, tue: { open: '10:00', close: '18:00' },
+      wed: { open: '10:00', close: '18:00' }, thu: { open: '10:00', close: '18:00' },
+      fri: { open: '10:00', close: '18:00' }, sat: { open: '10:00', close: '17:00' },
       sun: null,
     },
   },
@@ -378,7 +361,6 @@ const STORAGE_KEYS = {
 interface AppContextType {
   state: AppState;
   dispatch: React.Dispatch<Action>;
-  // Helpers
   getProvider: (id: string) => Provider | undefined;
   getFilteredProviders: () => Provider[];
   getAvailableSlots: (providerId: string, staffId: string, date: string) => TimeSlot[];
@@ -392,61 +374,51 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
-// ── Provider Component ──
 export function AppStoreProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Load persisted data
   useEffect(() => {
-    (async () => {
-      try {
-        const [bookingsStr, reviewsStr, roleStr, favoritesStr] = await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEYS.bookings),
-          AsyncStorage.getItem(STORAGE_KEYS.reviews),
-          AsyncStorage.getItem(STORAGE_KEYS.role),
-          AsyncStorage.getItem(STORAGE_KEYS.favorites),
-        ]);
-        dispatch({
-          type: 'LOAD_DATA',
-          payload: {
-            providers: MOCK_PROVIDERS,
-            bookings: bookingsStr ? JSON.parse(bookingsStr) : [],
-            reviews: reviewsStr ? JSON.parse(reviewsStr) : MOCK_REVIEWS,
-            favorites: favoritesStr ? JSON.parse(favoritesStr) : [],
-            userRole: (roleStr as 'customer' | 'provider') || 'customer',
-          },
-        });
-      } catch {
-        dispatch({ type: 'LOAD_DATA', payload: { providers: MOCK_PROVIDERS, reviews: MOCK_REVIEWS } });
-      }
-    })();
+    try {
+      const bookingsStr = localStorage.getItem(STORAGE_KEYS.bookings);
+      const reviewsStr = localStorage.getItem(STORAGE_KEYS.reviews);
+      const roleStr = localStorage.getItem(STORAGE_KEYS.role);
+      const favoritesStr = localStorage.getItem(STORAGE_KEYS.favorites);
+      dispatch({
+        type: 'LOAD_DATA',
+        payload: {
+          providers: MOCK_PROVIDERS,
+          bookings: bookingsStr ? JSON.parse(bookingsStr) : [],
+          reviews: reviewsStr ? JSON.parse(reviewsStr) : MOCK_REVIEWS,
+          favorites: favoritesStr ? JSON.parse(favoritesStr) : [],
+          userRole: (roleStr as 'customer' | 'provider') || 'customer',
+        },
+      });
+    } catch {
+      dispatch({ type: 'LOAD_DATA', payload: { providers: MOCK_PROVIDERS, reviews: MOCK_REVIEWS } });
+    }
   }, []);
 
-  // Persist bookings
   useEffect(() => {
     if (!state.isLoading) {
-      AsyncStorage.setItem(STORAGE_KEYS.bookings, JSON.stringify(state.bookings));
+      localStorage.setItem(STORAGE_KEYS.bookings, JSON.stringify(state.bookings));
     }
   }, [state.bookings, state.isLoading]);
 
-  // Persist reviews
   useEffect(() => {
     if (!state.isLoading) {
-      AsyncStorage.setItem(STORAGE_KEYS.reviews, JSON.stringify(state.reviews));
+      localStorage.setItem(STORAGE_KEYS.reviews, JSON.stringify(state.reviews));
     }
   }, [state.reviews, state.isLoading]);
 
-  // Persist role
   useEffect(() => {
     if (!state.isLoading) {
-      AsyncStorage.setItem(STORAGE_KEYS.role, state.userRole);
+      localStorage.setItem(STORAGE_KEYS.role, state.userRole);
     }
   }, [state.userRole, state.isLoading]);
 
-  // Persist favorites
   useEffect(() => {
     if (!state.isLoading) {
-      AsyncStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify(state.favorites));
+      localStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify(state.favorites));
     }
   }, [state.favorites, state.isLoading]);
 
@@ -473,7 +445,6 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
           p.staffMembers.some((s) => s.name.toLowerCase().includes(q))
       );
     }
-    // Sort by rating descending (higher rating first)
     result = [...result].sort((a, b) => b.rating - a.rating);
     return result;
   }, [state.providers, state.selectedCategory, state.selectedCity, state.searchQuery]);
@@ -482,10 +453,8 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
     (providerId: string, staffId: string, date: string): TimeSlot[] => {
       const provider = state.providers.find((p) => p.id === providerId);
       if (!provider) return [];
-
       const staff = provider.staffMembers.find((s) => s.id === staffId);
       if (!staff) return [];
-
       const dayMap: Record<string, string> = {
         '0': 'sun', '1': 'mon', '2': 'tue', '3': 'wed',
         '4': 'thu', '5': 'fri', '6': 'sat',
@@ -493,17 +462,14 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       const dayOfWeek = dayMap[new Date(date).getDay().toString()];
       const hours = provider.businessHours[dayOfWeek];
       if (!hours) return [];
-
       const bookedTimes = state.bookings
         .filter((b) => b.providerId === providerId && b.staffId === staffId && b.date === date && b.status !== 'cancelled')
         .map((b) => b.time);
-
       const slots: TimeSlot[] = [];
       const [openH, openM] = hours.open.split(':').map(Number);
       const [closeH, closeM] = hours.close.split(':').map(Number);
       let currentH = openH;
       let currentM = openM;
-
       while (currentH < closeH || (currentH === closeH && currentM < closeM)) {
         const timeStr = `${String(currentH).padStart(2, '0')}:${String(currentM).padStart(2, '0')}`;
         slots.push({

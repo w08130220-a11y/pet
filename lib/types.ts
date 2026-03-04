@@ -36,7 +36,7 @@ export interface Provider {
   services: Service[];
   staffMembers: StaffMember[];
   businessHours: BusinessHours;
-  photos: string[]; // store photo URIs, max 6
+  photos: string[];
 }
 
 export interface Service {
@@ -45,8 +45,8 @@ export interface Service {
   name: string;
   description: string;
   category: ServiceCategory;
-  duration: number; // minutes
-  price: number; // TWD
+  duration: number;
+  price: number;
   isAvailable: boolean;
 }
 
@@ -62,15 +62,15 @@ export interface StaffMember {
 }
 
 export interface BusinessHours {
-  [day: string]: { open: string; close: string } | null; // null = closed
+  [day: string]: { open: string; close: string } | null;
 }
 
 export interface TimeSlot {
   id: string;
   staffId: string;
   staffName: string;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:mm
+  date: string;
+  time: string;
   isAvailable: boolean;
 }
 

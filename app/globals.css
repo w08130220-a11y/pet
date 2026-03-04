@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1A1A1A;
+  --color-secondary: #C8A97E;
+  --color-background: #FAFAF8;
+  --color-surface: #FFFFFF;
+  --color-foreground: #1A1A1A;
+  --color-muted: #8E8E93;
+  --color-border: #E5E5E5;
+  --color-success: #34C759;
+  --color-warning: #FF9500;
+  --color-error: #FF3B30;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #F5F5F5;
+    --color-secondary: #D4B896;
+    --color-background: #121212;
+    --color-surface: #1E1E1E;
+    --color-foreground: #F5F5F5;
+    --color-muted: #8E8E93;
+    --color-border: #2C2C2C;
+    --color-success: #30D158;
+    --color-warning: #FFB340;
+    --color-error: #FF453A;
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+}
+
+/* Hide scrollbar for horizontal scroll areas */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
