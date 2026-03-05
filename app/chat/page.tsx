@@ -14,7 +14,7 @@ export default function ChatListPage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="pt-5 px-5">
-        <h1 className="text-[28px] font-bold text-foreground mb-1">訊息</h1>
+        <h1 className="text-[28px] font-bold text-foreground mb-1 font-heading tracking-tight">訊息</h1>
         <p className="text-sm text-muted mb-4">與設計師直接溝通</p>
 
         {sortedRooms.length === 0 ? (
@@ -34,7 +34,7 @@ export default function ChatListPage() {
                 onClick={() => router.push(`/chat/${room.id}`)}
                 className="w-full text-left bg-surface rounded-xl border border-border p-4 mb-2 flex items-center"
               >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-3 shrink-0">
+                <div className="w-12 h-12 rounded-full bg-accent/40 flex items-center justify-center mr-3 shrink-0">
                   <span className="text-xl">🏪</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -45,7 +45,7 @@ export default function ChatListPage() {
                   <p className="text-[13px] text-muted truncate">{room.lastMessage || '開始對話...'}</p>
                 </div>
                 {room.unreadCount > 0 && (
-                  <span className="ml-2 bg-primary text-surface text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
+                  <span className="ml-2 bg-secondary text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
                     {room.unreadCount}
                   </span>
                 )}

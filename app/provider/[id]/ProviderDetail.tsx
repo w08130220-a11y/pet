@@ -70,7 +70,7 @@ export default function ProviderDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <p className="text-base text-muted">找不到該店家</p>
-        <button onClick={() => router.back()} className="mt-4 text-sm text-primary">返回</button>
+        <button onClick={() => router.back()} className="mt-4 text-sm text-secondary">返回</button>
       </div>
     );
   }
@@ -108,7 +108,7 @@ export default function ProviderDetailPage() {
   return (
     <div className="min-h-screen bg-background pb-0">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-surface border-b border-border px-5 pt-4 pb-3">
+      <div className="sticky top-0 z-40 px-5 pt-4 pb-3" style={{ background: 'rgba(240,244,237,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center flex-1 min-w-0">
             <button onClick={goBack} className="mr-3 p-1 text-base text-foreground">←</button>
@@ -133,7 +133,7 @@ export default function ProviderDetailPage() {
             <p className="text-[13px] text-foreground leading-5 mb-4">• 私底下交易，本平台不承擔任何保障。</p>
             <button
               onClick={() => { setShowDepositDisclaimer(false); handleConfirmBooking(); }}
-              className="w-full bg-primary rounded-[10px] py-3.5 text-[15px] font-semibold text-surface mb-2"
+              className="w-full bg-secondary rounded-full py-3.5 text-[15px] font-semibold text-white mb-2"
             >
               我已了解，確認付款 ${depositAmount}
             </button>
@@ -155,7 +155,7 @@ export default function ProviderDetailPage() {
                   {SERVICE_CATEGORY_LABELS[provider.category]} · {provider.city} {provider.district}
                 </span>
                 {provider.isVerified && (
-                  <span className="ml-2 bg-primary text-surface text-[10px] font-semibold rounded px-1.5 py-0.5">認證</span>
+                  <span className="ml-2 bg-secondary text-white text-[10px] font-semibold rounded px-1.5 py-0.5">認證</span>
                 )}
               </div>
               <div className="flex items-center mb-2.5">
@@ -191,12 +191,12 @@ export default function ProviderDetailPage() {
                 className="flex items-center mb-2"
               >
                 <span className="text-[13px] text-muted w-[50px]">地址</span>
-                <span className="text-[13px] text-primary flex-1 underline">{provider.address}</span>
+                <span className="text-[13px] text-secondary flex-1 underline">{provider.address}</span>
                 <span className="text-xs ml-1">📍</span>
               </a>
               <a href={`tel:${provider.phone.replace(/[^0-9]/g, '')}`} className="flex items-center">
                 <span className="text-[13px] text-muted w-[50px]">電話</span>
-                <span className="text-[13px] text-primary underline">{provider.phone}</span>
+                <span className="text-[13px] text-secondary underline">{provider.phone}</span>
                 <span className="text-xs ml-1">📞</span>
               </a>
             </div>
@@ -279,7 +279,7 @@ export default function ProviderDetailPage() {
                 const roomId = getOrCreateChatRoom(provider.id, provider.name);
                 router.push(`/chat/${roomId}`);
               }}
-              className="w-full rounded-xl border-2 border-primary py-3.5 mt-4 text-[15px] font-semibold text-primary flex items-center justify-center gap-2"
+              className="w-full rounded-xl border-2 border-secondary py-3.5 mt-4 text-[15px] font-semibold text-secondary flex items-center justify-center gap-2"
             >
               💬 與店家聊天
             </button>
@@ -309,7 +309,7 @@ export default function ProviderDetailPage() {
                       setReportTarget(null);
                       setReportReason('');
                     }}
-                    className="w-full bg-error rounded-[10px] py-3 text-[15px] font-semibold text-surface mb-2"
+                    className="w-full bg-error rounded-full py-3 text-[15px] font-semibold text-white mb-2"
                   >
                     送出檢舉
                   </button>
@@ -346,7 +346,7 @@ export default function ProviderDetailPage() {
             {/* Book Button */}
             <button
               onClick={() => setStep('select-service')}
-              className="w-full bg-primary rounded-[10px] py-4 mt-6 text-base font-semibold text-surface"
+              className="w-full bg-secondary rounded-full py-4 mt-6 text-base font-semibold text-white"
             >
               立即預約
             </button>
@@ -362,7 +362,7 @@ export default function ProviderDetailPage() {
                 key={service.id}
                 onClick={() => { setSelectedService(service); setStep('select-staff'); }}
                 className={`w-full text-left bg-surface rounded-xl border p-4 mb-2.5 ${
-                  selectedService?.id === service.id ? 'border-primary' : 'border-border'
+                  selectedService?.id === service.id ? 'border-secondary' : 'border-border'
                 }`}
               >
                 <div className="flex justify-between items-center">
@@ -390,7 +390,7 @@ export default function ProviderDetailPage() {
                 key={staff.id}
                 onClick={() => { setSelectedStaff(staff); setSelectedDate(dates[0].date); setStep('select-time'); }}
                 className={`w-full text-left bg-surface rounded-xl border p-4 mb-2.5 flex items-center ${
-                  selectedStaff?.id === staff.id ? 'border-primary' : 'border-border'
+                  selectedStaff?.id === staff.id ? 'border-secondary' : 'border-border'
                 }`}
               >
                 <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center mr-3.5">
@@ -421,14 +421,14 @@ export default function ProviderDetailPage() {
                   onClick={() => { setSelectedDate(d.date); setSelectedTime(''); }}
                   className={`shrink-0 w-16 py-2.5 rounded-[10px] border text-center ${
                     selectedDate === d.date
-                      ? 'bg-primary border-primary'
+                      ? 'bg-primary border-secondary'
                       : 'bg-surface border-border'
                   }`}
                 >
-                  <p className={`text-xs mb-0.5 ${selectedDate === d.date ? 'text-surface' : 'text-muted'}`}>
+                  <p className={`text-xs mb-0.5 ${selectedDate === d.date ? 'text-white' : 'text-muted'}`}>
                     {d.dayLabel}
                   </p>
-                  <p className={`text-base font-semibold ${selectedDate === d.date ? 'text-surface' : 'text-foreground'}`}>
+                  <p className={`text-base font-semibold ${selectedDate === d.date ? 'text-white' : 'text-foreground'}`}>
                     {d.label}
                   </p>
                 </button>
@@ -451,7 +451,7 @@ export default function ProviderDetailPage() {
                       !slot.isAvailable
                         ? 'bg-border border-border text-muted opacity-40 cursor-not-allowed'
                         : selectedTime === slot.time
-                          ? 'bg-primary border-primary text-surface'
+                          ? 'bg-primary border-secondary text-white'
                           : 'bg-surface border-border text-foreground'
                     }`}
                   >
@@ -467,7 +467,7 @@ export default function ProviderDetailPage() {
             {selectedTime && (
               <button
                 onClick={() => setStep('confirm')}
-                className="w-full bg-primary rounded-[10px] py-4 mt-6 text-base font-semibold text-surface"
+                className="w-full bg-secondary rounded-full py-4 mt-6 text-base font-semibold text-white"
               >
                 下一步
               </button>
@@ -513,7 +513,7 @@ export default function ProviderDetailPage() {
               </div>
               <div className="flex justify-between mb-2">
                 <span className="text-sm text-foreground">訂金（10%）</span>
-                <span className="text-sm font-semibold text-primary">${depositAmount}</span>
+                <span className="text-sm font-semibold text-secondary">${depositAmount}</span>
               </div>
               <div className="flex justify-between pt-2 border-t border-border">
                 <span className="text-sm text-muted">到店再付</span>
@@ -534,7 +534,7 @@ export default function ProviderDetailPage() {
             {/* Confirm Button */}
             <button
               onClick={() => setShowDepositDisclaimer(true)}
-              className="w-full bg-primary rounded-[10px] py-4 text-base font-semibold text-surface"
+              className="w-full bg-secondary rounded-full py-4 text-base font-semibold text-white"
             >
               確認預約並付訂金 ${depositAmount}
             </button>

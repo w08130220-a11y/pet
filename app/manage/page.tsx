@@ -143,7 +143,7 @@ export default function ManagePage() {
     return (
       <div className="min-h-screen bg-background">
         <div className="pt-5 px-5">
-          <h1 className="text-[28px] font-bold text-foreground mb-4">業者中心</h1>
+          <h1 className="text-[28px] font-bold text-foreground mb-4 font-heading tracking-tight">業者中心</h1>
         </div>
         <div className="flex flex-col items-center justify-center px-10 pt-20">
           <div className="text-5xl mb-5">🏪</div>
@@ -153,7 +153,7 @@ export default function ManagePage() {
           </p>
           <button
             onClick={() => setIsRegistering(true)}
-            className="bg-primary rounded-[10px] py-3.5 px-10 text-base font-semibold text-surface"
+            className="bg-secondary rounded-full py-3.5 px-10 text-base font-semibold text-white"
           >
             立即註冊
           </button>
@@ -169,7 +169,7 @@ export default function ManagePage() {
         <div className="pt-5 px-5">
           <div className="flex items-center mb-4">
             <button onClick={() => setIsRegistering(false)} className="mr-3 text-base text-muted">← 返回</button>
-            <h1 className="text-[22px] font-bold text-foreground">店家註冊</h1>
+            <h1 className="text-[22px] font-bold text-foreground font-heading">店家註冊</h1>
           </div>
         </div>
         <div className="px-5 pb-10">
@@ -180,7 +180,7 @@ export default function ManagePage() {
           <div className="flex flex-wrap gap-2 mb-4">
             {CATEGORIES.map((cat) => (
               <button key={cat} onClick={() => setForm({ ...form, category: cat })}
-                className={`px-3.5 py-2 rounded-full border text-sm ${form.category === cat ? 'bg-primary text-surface border-primary' : 'bg-surface text-foreground border-border'}`}>
+                className={`px-3.5 py-2 rounded-full border text-sm ${form.category === cat ? 'bg-secondary text-white border-secondary' : 'bg-surface text-foreground border-border'}`}>
                 {SERVICE_CATEGORY_ICONS[cat]} {SERVICE_CATEGORY_LABELS[cat]}
               </button>
             ))}
@@ -190,7 +190,7 @@ export default function ManagePage() {
           <div className="flex overflow-x-auto hide-scrollbar mb-4 gap-2">
             {CITIES.map((city) => (
               <button key={city} onClick={() => setForm({ ...form, city })}
-                className={`shrink-0 px-3.5 py-2 rounded-full border text-sm ${form.city === city ? 'bg-primary text-surface border-primary' : 'bg-surface text-foreground border-border'}`}>
+                className={`shrink-0 px-3.5 py-2 rounded-full border text-sm ${form.city === city ? 'bg-secondary text-white border-secondary' : 'bg-surface text-foreground border-border'}`}>
                 {city}
               </button>
             ))}
@@ -208,7 +208,7 @@ export default function ManagePage() {
           <label className="block text-sm font-medium text-foreground mb-1.5">店家介紹</label>
           <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="簡單介紹你的服務特色..." rows={3} className={`${inputCls} resize-none`} />
 
-          <button onClick={handleRegister} className="w-full bg-primary rounded-[10px] py-4 text-base font-semibold text-surface">
+          <button onClick={handleRegister} className="w-full bg-secondary rounded-full py-4 text-base font-semibold text-white">
             完成註冊
           </button>
         </div>
@@ -254,12 +254,12 @@ export default function ManagePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="pt-5 px-5">
-        <h1 className="text-[28px] font-bold text-foreground mb-1">業者中心</h1>
+        <h1 className="text-[28px] font-bold text-foreground mb-1 font-heading tracking-tight">業者中心</h1>
         {myProvider && <p className="text-sm text-muted mb-4">{myProvider.name}</p>}
         <div className="flex overflow-x-auto hide-scrollbar mb-4 gap-2">
           {tabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`shrink-0 px-4 py-2 rounded-full border text-sm font-medium ${activeTab === tab.key ? 'bg-primary text-surface border-primary' : 'bg-surface text-foreground border-border'}`}>
+              className={`shrink-0 px-4 py-2 rounded-full border text-sm font-medium ${activeTab === tab.key ? 'bg-secondary text-white border-secondary' : 'bg-surface text-foreground border-border'}`}>
               {tab.label}
             </button>
           ))}
@@ -345,13 +345,13 @@ export default function ManagePage() {
             <div className="flex justify-between items-center mb-3">
               <span className="text-[13px] text-muted">{myProvider.services.length} 項服務</span>
               <button onClick={() => setShowAddService(!showAddService)}
-                className="bg-primary rounded-lg px-3.5 py-2 text-[13px] font-semibold text-surface">
+                className="bg-secondary rounded-full px-3.5 py-2 text-[13px] font-semibold text-white">
                 + 新增服務
               </button>
             </div>
 
             {showAddService && (
-              <div className="bg-surface rounded-xl border-2 border-primary p-4 mb-3">
+              <div className="bg-surface rounded-xl border-2 border-secondary p-4 mb-3">
                 <h3 className="text-[15px] font-semibold text-foreground mb-3">新增服務項目</h3>
                 <input value={serviceForm.name} onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })} placeholder="服務名稱 *" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
                 <input value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} placeholder="服務描述" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
@@ -360,7 +360,7 @@ export default function ManagePage() {
                   <input value={serviceForm.price} onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })} placeholder="價格(NTD) *" type="number" className="flex-1 bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted" />
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={handleAddService} className="flex-1 bg-primary rounded-lg py-3 text-sm font-semibold text-surface">確認新增</button>
+                  <button onClick={handleAddService} className="flex-1 bg-secondary rounded-full py-3 text-sm font-semibold text-white">確認新增</button>
                   <button onClick={() => setShowAddService(false)} className="flex-1 rounded-lg border border-border py-3 text-sm text-muted">取消</button>
                 </div>
               </div>
@@ -377,15 +377,15 @@ export default function ManagePage() {
                     <div className="flex items-center gap-1.5">
                       <input value={editPrice} onChange={(e) => setEditPrice(e.target.value)} type="number"
                         placeholder={String(service.price)}
-                        className="w-20 border border-primary rounded-md px-2 py-1 text-sm text-foreground text-right" />
-                      <button onClick={() => handleUpdatePrice(service.id)} className="text-sm text-primary font-semibold">✓</button>
+                        className="w-20 border border-secondary rounded-md px-2 py-1 text-sm text-foreground text-right" />
+                      <button onClick={() => handleUpdatePrice(service.id)} className="text-sm text-secondary font-semibold">✓</button>
                       <button onClick={() => { setEditingServiceId(null); setEditPrice(''); }} className="text-sm text-muted">✕</button>
                     </div>
                   ) : (
                     <button onClick={() => { setEditingServiceId(service.id); setEditPrice(String(service.price)); }}
                       className="text-right">
                       <p className="text-base font-semibold text-foreground">${service.price}</p>
-                      <p className="text-[10px] text-primary">點擊修改</p>
+                      <p className="text-[10px] text-secondary">點擊修改</p>
                     </button>
                   )}
                 </div>
@@ -403,19 +403,19 @@ export default function ManagePage() {
             <div className="flex justify-between items-center mb-3">
               <span className="text-[13px] text-muted">{myProvider.staffMembers.length} 位人員</span>
               <button onClick={() => setShowAddStaff(!showAddStaff)}
-                className="bg-primary rounded-lg px-3.5 py-2 text-[13px] font-semibold text-surface">
+                className="bg-secondary rounded-full px-3.5 py-2 text-[13px] font-semibold text-white">
                 + 新增人員
               </button>
             </div>
 
             {showAddStaff && (
-              <div className="bg-surface rounded-xl border-2 border-primary p-4 mb-3">
+              <div className="bg-surface rounded-xl border-2 border-secondary p-4 mb-3">
                 <h3 className="text-[15px] font-semibold text-foreground mb-3">新增服務人員</h3>
                 <input value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} placeholder="姓名 *" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
                 <input value={staffForm.title} onChange={(e) => setStaffForm({ ...staffForm, title: e.target.value })} placeholder="職稱 * (例：設計師、美甲師)" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
                 <input value={staffForm.specialties} onChange={(e) => setStaffForm({ ...staffForm, specialties: e.target.value })} placeholder="專長 (用「、」分隔)" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
                 <div className="flex gap-2">
-                  <button onClick={handleAddStaff} className="flex-1 bg-primary rounded-lg py-3 text-sm font-semibold text-surface">確認新增</button>
+                  <button onClick={handleAddStaff} className="flex-1 bg-secondary rounded-full py-3 text-sm font-semibold text-white">確認新增</button>
                   <button onClick={() => setShowAddStaff(false)} className="flex-1 rounded-lg border border-border py-3 text-sm text-muted">取消</button>
                 </div>
               </div>
@@ -469,7 +469,7 @@ export default function ManagePage() {
             <div className="flex justify-between items-center mb-3">
               <span className="text-[13px] text-muted">{myPortfolio.length} 件作品</span>
               <button onClick={() => setShowAddPortfolio(!showAddPortfolio)}
-                className="bg-primary rounded-lg px-3.5 py-2 text-[13px] font-semibold text-surface">
+                className="bg-secondary rounded-full px-3.5 py-2 text-[13px] font-semibold text-white">
                 + 上傳作品
               </button>
             </div>
@@ -484,7 +484,7 @@ export default function ManagePage() {
             )}
 
             {showAddPortfolio && (
-              <div className="bg-surface rounded-xl border-2 border-primary p-4 mb-3">
+              <div className="bg-surface rounded-xl border-2 border-secondary p-4 mb-3">
                 <h3 className="text-[15px] font-semibold text-foreground mb-3">上傳作品</h3>
                 <input
                   value={portfolioForm.title}
@@ -516,7 +516,7 @@ export default function ManagePage() {
                   <span className="text-xs text-muted mt-1">點擊上傳作品照片</span>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={handleAddPortfolio} className="flex-1 bg-primary rounded-lg py-3 text-sm font-semibold text-surface">確認上傳</button>
+                  <button onClick={handleAddPortfolio} className="flex-1 bg-secondary rounded-full py-3 text-sm font-semibold text-white">確認上傳</button>
                   <button onClick={() => setShowAddPortfolio(false)} className="flex-1 rounded-lg border border-border py-3 text-sm text-muted">取消</button>
                 </div>
               </div>
@@ -568,7 +568,7 @@ export default function ManagePage() {
                 const unread = room.unreadCount > 0;
                 return (
                   <div key={room.id} className="bg-surface rounded-xl border border-border p-3.5 mb-2 flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                    <div className="w-10 h-10 rounded-full bg-accent/40 flex items-center justify-center mr-3">
                       <span className="text-base">👤</span>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -576,7 +576,7 @@ export default function ManagePage() {
                       <p className="text-[13px] text-muted truncate">{room.lastMessage || '新對話'}</p>
                     </div>
                     {unread && (
-                      <span className="bg-primary text-surface text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="bg-primary text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {room.unreadCount}
                       </span>
                     )}

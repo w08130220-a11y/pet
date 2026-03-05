@@ -20,7 +20,13 @@ export default function BottomNav() {
   if (pathname.match(/^\/chat\/.+/)) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border z-50">
+    <nav className="fixed bottom-0 left-0 right-0 z-50"
+      style={{
+        background: 'rgba(240,244,237,0.92)',
+        backdropFilter: 'blur(12px)',
+        borderTop: '1px solid rgba(0,0,0,0.06)',
+      }}
+    >
       <div className="flex justify-around items-center h-14 max-w-lg mx-auto">
         {tabs.map((tab) => {
           const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
@@ -29,11 +35,11 @@ export default function BottomNav() {
               key={tab.href}
               href={tab.href}
               className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
-                isActive ? 'text-primary' : 'text-muted'
+                isActive ? 'text-secondary' : 'text-muted'
               }`}
             >
               <span className="text-lg">{tab.icon}</span>
-              <span className="text-[11px] font-medium mt-0.5">{tab.label}</span>
+              <span className={`text-[11px] mt-0.5 ${isActive ? 'font-semibold' : 'font-medium'}`}>{tab.label}</span>
             </Link>
           );
         })}

@@ -1,38 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --color-primary: #1A1A1A;
-  --color-secondary: #C8A97E;
-  --color-background: #FAFAF8;
-  --color-surface: #FFFFFF;
-  --color-foreground: #1A1A1A;
-  --color-muted: #8E8E93;
-  --color-border: #E5E5E5;
-  --color-success: #34C759;
-  --color-warning: #FF9500;
-  --color-error: #FF3B30;
+  --color-primary: #1a1a18;
+  --color-secondary: #4a6741;
+  --color-accent: #c8d8c2;
+  --color-background: #f0f4ed;
+  --color-surface: #ffffff;
+  --color-foreground: #1a1a18;
+  --color-muted: #6a6a62;
+  --color-border: #dde5d8;
+  --color-success: #4a6741;
+  --color-warning: #c4956a;
+  --color-error: #a85a4a;
+  --color-dark: #1a2e1a;
+  --color-dark-surface: #243824;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: #F5F5F5;
-    --color-secondary: #D4B896;
-    --color-background: #121212;
-    --color-surface: #1E1E1E;
-    --color-foreground: #F5F5F5;
-    --color-muted: #8E8E93;
-    --color-border: #2C2C2C;
-    --color-success: #30D158;
-    --color-warning: #FFB340;
-    --color-error: #FF453A;
+    --color-primary: #f0f4ed;
+    --color-secondary: #7ab87a;
+    --color-accent: #2d4a2a;
+    --color-background: #121a12;
+    --color-surface: #1a2e1a;
+    --color-foreground: #f0f4ed;
+    --color-muted: #8a9a82;
+    --color-border: #2d4a2a;
+    --color-success: #7ab87a;
+    --color-warning: #d4a87a;
+    --color-error: #c87a6a;
+    --color-dark: #0a140a;
+    --color-dark-surface: #1a2e1a;
   }
 }
 
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
 }
 
 input:focus, textarea:focus {
@@ -46,4 +62,57 @@ input:focus, textarea:focus {
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Area-style button */
+.btn-primary {
+  background-color: var(--color-secondary);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 28px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-secondary);
+  border: 1.5px solid var(--color-secondary);
+  border-radius: 24px;
+  padding: 12px 28px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Area-style badge */
+.badge {
+  display: inline-block;
+  background: var(--color-secondary);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 11px;
+  font-family: var(--font-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.badge-light {
+  background: var(--color-accent);
+  color: #2d4a2a;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
 }

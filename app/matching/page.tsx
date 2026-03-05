@@ -18,7 +18,7 @@ function RequestCard({ request, onAccept, onChat }: {
   const [expanded, setExpanded] = useState(false);
 
   const statusColors: Record<string, string> = {
-    open: 'bg-blue-100 text-blue-800',
+    open: 'bg-accent text-secondary',
     matched: 'bg-green-100 text-green-800',
     expired: 'bg-gray-100 text-gray-600',
     cancelled: 'bg-red-100 text-red-800',
@@ -28,14 +28,14 @@ function RequestCard({ request, onAccept, onChat }: {
     <div className="bg-surface rounded-xl border border-border p-4 mb-3">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <span className="text-[15px] font-medium text-foreground">
+          <span className="text-[15px] font-medium text-foreground font-heading">
             {SERVICE_CATEGORY_ICONS[request.category]} {SERVICE_CATEGORY_LABELS[request.category]}
           </span>
           <p className="text-[13px] text-muted mt-0.5">
             {request.city} · {request.preferredDate} {request.preferredTime}
           </p>
         </div>
-        <span className={`text-xs px-2 py-1 rounded-full ${statusColors[request.status]}`}>
+        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusColors[request.status]}`}>
           {MATCHING_STATUS_LABELS[request.status]}
         </span>
       </div>
@@ -45,7 +45,7 @@ function RequestCard({ request, onAccept, onChat }: {
       {request.responses.length > 0 && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-sm text-primary font-medium"
+          className="mt-2 text-sm text-secondary font-medium"
         >
           {expanded ? '收起' : `查看 ${request.responses.length} 位設計師回覆 ▼`}
         </button>
@@ -54,8 +54,8 @@ function RequestCard({ request, onAccept, onChat }: {
       {expanded && request.responses.map((resp) => (
         <div key={resp.id} className="mt-2 bg-background rounded-lg p-3 border border-border">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-[15px] font-medium text-foreground">{resp.providerName}</span>
-            <span className="text-[15px] font-semibold text-primary">${resp.price}</span>
+            <span className="text-[15px] font-medium text-foreground font-heading">{resp.providerName}</span>
+            <span className="text-[15px] font-semibold text-secondary">${resp.price}</span>
           </div>
           <p className="text-[13px] text-muted mb-1">設計師：{resp.staffName}</p>
           <p className="text-sm text-foreground mb-2">{resp.message}</p>
@@ -66,14 +66,14 @@ function RequestCard({ request, onAccept, onChat }: {
             {request.status === 'open' && (
               <button
                 onClick={() => onAccept(request.id, resp.providerId, resp.providerName)}
-                className="flex-1 bg-primary rounded-lg py-2 text-sm font-semibold text-surface"
+                className="flex-1 bg-secondary rounded-full py-2 text-sm font-semibold text-white"
               >
                 選擇此設計師
               </button>
             )}
             <button
               onClick={() => onChat(resp.providerId, resp.providerName)}
-              className="flex-1 rounded-lg border border-primary py-2 text-sm font-semibold text-primary"
+              className="flex-1 rounded-full border border-secondary py-2 text-sm font-semibold text-secondary"
             >
               聊天溝通
             </button>
@@ -150,12 +150,12 @@ export default function MatchingPage() {
     router.push(`/chat/${roomId}`);
   };
 
-  const inputCls = 'w-full bg-surface border border-border rounded-lg px-3.5 py-3 text-[15px] text-foreground placeholder:text-muted mb-3';
+  const inputCls = 'w-full bg-surface border border-border rounded-xl px-3.5 py-3 text-[15px] text-foreground placeholder:text-muted mb-3';
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="pt-5 px-5">
-        <h1 className="text-[28px] font-bold text-foreground mb-1">智能媒合</h1>
+        <h1 className="text-[28px] font-bold text-foreground mb-1 font-heading tracking-tight">智能媒合</h1>
         <p className="text-sm text-muted mb-4">描述你的需求，讓設計師主動來找你</p>
 
         {/* Toggle: Self-book vs Matching */}
@@ -168,9 +168,9 @@ export default function MatchingPage() {
             <span className="text-sm text-foreground font-medium">自己選擇</span>
             <p className="text-[11px] text-muted mt-0.5">瀏覽店家自助預約</p>
           </button>
-          <button className="flex-1 rounded-xl border-2 border-primary bg-primary/5 py-3 text-center">
+          <button className="flex-1 rounded-xl border-2 border-secondary bg-accent/30 py-3 text-center">
             <span className="text-lg block mb-1">🤖</span>
-            <span className="text-sm text-primary font-semibold">智能媒合</span>
+            <span className="text-sm text-secondary font-semibold">智能媒合</span>
             <p className="text-[11px] text-muted mt-0.5">描述需求自動配對</p>
           </button>
         </div>
@@ -179,7 +179,7 @@ export default function MatchingPage() {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="w-full bg-primary rounded-xl py-4 text-base font-semibold text-surface mb-5"
+            className="w-full bg-secondary rounded-full py-4 text-base font-semibold text-white mb-5 transition-all hover:opacity-90"
           >
             + 發佈新需求
           </button>
@@ -187,8 +187,8 @@ export default function MatchingPage() {
 
         {/* Request Form */}
         {showForm && (
-          <div className="bg-surface rounded-xl border-2 border-primary p-4 mb-5">
-            <h3 className="text-lg font-semibold text-foreground mb-3">填寫您的需求</h3>
+          <div className="bg-surface rounded-xl border-2 border-secondary p-4 mb-5">
+            <h3 className="text-lg font-semibold text-foreground mb-3 font-heading">填寫您的需求</h3>
 
             <label className="block text-sm font-medium text-foreground mb-1.5">服務類型</label>
             <div className="flex flex-wrap gap-2 mb-3">
@@ -196,9 +196,9 @@ export default function MatchingPage() {
                 <button
                   key={cat}
                   onClick={() => setForm({ ...form, category: cat })}
-                  className={`px-3 py-1.5 rounded-full border text-sm ${
+                  className={`px-3 py-1.5 rounded-full border text-sm transition-all ${
                     form.category === cat
-                      ? 'bg-primary text-surface border-primary'
+                      ? 'bg-secondary text-white border-secondary'
                       : 'bg-surface text-foreground border-border'
                   }`}
                 >
@@ -213,9 +213,9 @@ export default function MatchingPage() {
                 <button
                   key={city}
                   onClick={() => setForm({ ...form, city })}
-                  className={`shrink-0 px-3 py-1.5 rounded-full border text-sm ${
+                  className={`shrink-0 px-3 py-1.5 rounded-full border text-sm transition-all ${
                     form.city === city
-                      ? 'bg-primary text-surface border-primary'
+                      ? 'bg-secondary text-white border-secondary'
                       : 'bg-surface text-foreground border-border'
                   }`}
                 >
@@ -265,13 +265,13 @@ export default function MatchingPage() {
             <div className="flex gap-2">
               <button
                 onClick={handleSubmit}
-                className="flex-1 bg-primary rounded-lg py-3.5 text-[15px] font-semibold text-surface"
+                className="flex-1 bg-secondary rounded-full py-3.5 text-[15px] font-semibold text-white"
               >
                 送出需求
               </button>
               <button
                 onClick={() => setShowForm(false)}
-                className="flex-1 rounded-lg border border-border py-3.5 text-[15px] text-muted"
+                className="flex-1 rounded-full border border-border py-3.5 text-[15px] text-muted"
               >
                 取消
               </button>
@@ -280,7 +280,7 @@ export default function MatchingPage() {
         )}
 
         {/* My Requests */}
-        <h2 className="text-base font-semibold text-foreground mb-3">我的需求</h2>
+        <h2 className="text-base font-semibold text-foreground mb-3 font-heading">我的需求</h2>
         {myRequests.length === 0 ? (
           <div className="bg-surface rounded-xl border border-border p-8 text-center">
             <div className="text-[40px] mb-2">🤖</div>

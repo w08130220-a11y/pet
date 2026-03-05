@@ -34,7 +34,7 @@ export default function BookingsPage() {
       case 'pending': return 'var(--color-warning)';
       case 'completed': return 'var(--color-muted)';
       case 'cancelled': return 'var(--color-error)';
-      case 'provider_cancelled': return '#FF6B00';
+      case 'provider_cancelled': return '#c4956a';
     }
   };
 
@@ -67,7 +67,7 @@ export default function BookingsPage() {
   if (state.isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function BookingsPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="pt-5 px-5">
-        <h1 className="text-[28px] font-bold text-foreground mb-4">我的預約</h1>
+        <h1 className="text-[28px] font-bold text-foreground mb-4 font-heading tracking-tight">我的預約</h1>
 
         {/* Status Tabs */}
         <div className="flex overflow-x-auto hide-scrollbar mb-4 gap-2">
@@ -83,9 +83,9 @@ export default function BookingsPage() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`shrink-0 px-4 py-2 rounded-full border text-sm font-medium ${
+              className={`shrink-0 px-4 py-2 rounded-full border text-sm font-medium transition-all ${
                 activeTab === tab.key
-                  ? 'bg-primary text-surface border-primary'
+                  ? 'bg-secondary text-white border-secondary'
                   : 'bg-surface text-foreground border-border'
               }`}
             >
@@ -114,9 +114,9 @@ export default function BookingsPage() {
               <div key={booking.id} className="bg-surface rounded-xl border border-border p-4 mb-3">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-[17px] font-semibold text-foreground">{booking.providerName}</span>
+                  <span className="text-[17px] font-semibold text-foreground font-heading">{booking.providerName}</span>
                   <span
-                    className="px-2.5 py-0.5 rounded-xl text-xs font-semibold"
+                    className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
                     style={{ backgroundColor: statusColor + '18', color: statusColor }}
                   >
                     {BOOKING_STATUS_LABELS[booking.status]}
@@ -144,13 +144,13 @@ export default function BookingsPage() {
                     訂金 ${booking.depositAmount}
                     {booking.depositPaid ? ' ✓ 已付' : ' 未付'}
                   </span>
-                  <span className="text-[17px] font-semibold text-foreground">${booking.totalPrice}</span>
+                  <span className="text-[17px] font-semibold text-foreground font-heading">${booking.totalPrice}</span>
                 </div>
 
                 {/* Provider cancelled notice */}
                 {booking.status === 'provider_cancelled' && (
-                  <div className="mt-2.5 bg-orange-50 rounded-lg p-2.5 border border-orange-300">
-                    <p className="text-xs text-orange-900 leading-[18px]">
+                  <div className="mt-2.5 bg-warning/10 rounded-xl p-2.5 border border-warning/30">
+                    <p className="text-xs text-foreground leading-[18px]">
                       此預約由商家取消（未提前告知），您可對該商家進行一次評價。
                     </p>
                   </div>
@@ -160,7 +160,7 @@ export default function BookingsPage() {
                 {(booking.status === 'confirmed' || booking.status === 'pending') && (
                   <button
                     onClick={() => handleCancel(booking.id)}
-                    className={`mt-3 w-full py-2.5 rounded-lg border text-sm font-medium ${
+                    className={`mt-3 w-full py-2.5 rounded-full border text-sm font-medium transition-all ${
                       booking.status === 'confirmed'
                         ? 'border-error text-error'
                         : 'border-border text-muted'
@@ -183,7 +183,7 @@ export default function BookingsPage() {
                           setReviewComment('');
                         }
                       }}
-                      className="mt-3 w-full py-2.5 rounded-lg bg-primary text-surface text-sm font-medium"
+                      className="mt-3 w-full py-2.5 rounded-full bg-secondary text-white text-sm font-medium transition-all hover:opacity-90"
                     >
                       撰寫評價
                     </button>
@@ -206,11 +206,11 @@ export default function BookingsPage() {
                           value={reviewComment}
                           onChange={(e) => setReviewComment(e.target.value)}
                           placeholder="分享你的體驗..."
-                          className="w-full bg-background border border-border rounded-lg px-3.5 py-3 text-sm text-foreground placeholder:text-muted h-20 resize-none mb-2.5"
+                          className="w-full bg-background border border-border rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted h-20 resize-none mb-2.5"
                         />
                         <button
                           onClick={() => handleSubmitReview(booking)}
-                          className="w-full bg-primary rounded-lg py-2.5 text-sm font-semibold text-surface"
+                          className="w-full bg-secondary rounded-full py-2.5 text-sm font-semibold text-white"
                         >
                           送出評價
                         </button>

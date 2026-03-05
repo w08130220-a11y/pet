@@ -12,6 +12,7 @@ const config: Config = {
       colors: {
         primary: 'var(--color-primary)',
         secondary: 'var(--color-secondary)',
+        accent: 'var(--color-accent)',
         background: 'var(--color-background)',
         surface: 'var(--color-surface)',
         foreground: 'var(--color-foreground)',
@@ -20,6 +21,15 @@ const config: Config = {
         success: 'var(--color-success)',
         warning: 'var(--color-warning)',
         error: 'var(--color-error)',
+        dark: 'var(--color-dark)',
+        'dark-surface': 'var(--color-dark-surface)',
+      },
+      fontFamily: {
+        heading: ['Playfair Display', 'serif'],
+        body: ['DM Sans', 'sans-serif'],
+      },
+      borderRadius: {
+        'pill': '24px',
       },
     },
   },

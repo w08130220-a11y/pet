@@ -30,11 +30,11 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="pt-5 px-5 mb-6">
-        <h1 className="text-[28px] font-bold text-foreground mb-5">我的</h1>
+        <h1 className="text-[28px] font-bold text-foreground mb-5 font-heading tracking-tight">我的</h1>
 
         {/* Avatar & Info */}
         <div className="flex items-center">
-          <div className="w-14 h-14 rounded-full bg-border flex items-center justify-center mr-3.5">
+          <div className="w-14 h-14 rounded-full bg-accent/40 flex items-center justify-center mr-3.5">
             <span className="text-2xl">👤</span>
           </div>
           <div>
@@ -115,7 +115,7 @@ export default function ProfilePage() {
             type: 'SET_ROLE',
             payload: state.userRole === 'customer' ? 'provider' : 'customer',
           })}
-          className="w-full rounded-[10px] border border-border py-3.5 text-sm text-muted"
+          className="w-full rounded-full border border-secondary py-3.5 text-sm text-secondary font-medium transition-all hover:bg-secondary hover:text-white"
         >
           {state.userRole === 'customer' ? '切換為業者模式' : '切換為客戶模式'}
         </button>

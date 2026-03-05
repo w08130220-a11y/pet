@@ -53,12 +53,12 @@ export default function ChatRoomPage() {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
-      <div className="bg-surface border-b border-border px-5 pt-4 pb-3 flex items-center">
+      <div className="border-b px-5 pt-4 pb-3 flex items-center" style={{ background: 'rgba(240,244,237,0.92)', backdropFilter: 'blur(12px)', borderColor: 'rgba(0,0,0,0.06)' }}>
         <button onClick={() => router.back()} className="mr-3 p-1 text-base text-foreground">←</button>
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+        <div className="w-8 h-8 rounded-full bg-accent/40 flex items-center justify-center mr-2">
           <span className="text-sm">🏪</span>
         </div>
-        <span className="text-lg font-semibold text-foreground">{room.providerName}</span>
+        <span className="text-lg font-semibold text-foreground font-heading">{room.providerName}</span>
       </div>
 
       {/* Messages */}
@@ -75,12 +75,12 @@ export default function ChatRoomPage() {
               <div
                 className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                   isMe
-                    ? 'bg-primary text-surface rounded-br-md'
+                    ? 'bg-secondary text-white rounded-br-md'
                     : 'bg-surface border border-border text-foreground rounded-bl-md'
                 }`}
               >
                 <p className="text-sm leading-5 whitespace-pre-wrap">{msg.content}</p>
-                <p className={`text-[10px] mt-1 ${isMe ? 'text-surface/60' : 'text-muted'}`}>
+                <p className={`text-[10px] mt-1 ${isMe ? 'text-white/60' : 'text-muted'}`}>
                   {new Date(msg.createdAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -103,22 +103,22 @@ export default function ChatRoomPage() {
       </div>
 
       {/* Input */}
-      <div className="bg-surface border-t border-border px-4 py-3 flex items-center gap-2">
+      <div className="border-t px-4 py-3 flex items-center gap-2" style={{ background: 'rgba(240,244,237,0.92)', backdropFilter: 'blur(12px)', borderColor: 'rgba(0,0,0,0.06)' }}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="輸入訊息..."
-          className="flex-1 bg-background border border-border rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted"
+          className="flex-1 bg-surface border border-border rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted"
         />
         <button
           onClick={handleSend}
           disabled={!input.trim()}
-          className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            input.trim() ? 'bg-primary' : 'bg-border'
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+            input.trim() ? 'bg-secondary' : 'bg-border'
           }`}
         >
-          <span className="text-surface text-sm">➤</span>
+          <span className="text-white text-sm">➤</span>
         </button>
       </div>
     </div>
