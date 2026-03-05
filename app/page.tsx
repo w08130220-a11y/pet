@@ -22,48 +22,52 @@ function ProviderCard({ provider, onPress, isFavorite, onToggleFavorite }: {
   return (
     <div
       onClick={onPress}
-      className="bg-surface rounded-xl border border-border p-4 mb-3 cursor-pointer hover:shadow-md transition-all hover:-translate-y-0.5"
+      className="area-card p-5 mb-4 cursor-pointer"
     >
       <div className="flex justify-between items-start">
         <div className="flex-1 mr-3">
-          <div className="flex items-center mb-1">
-            <span className="text-[17px] font-semibold text-foreground font-heading">{provider.name}</span>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#1a1a18', letterSpacing: '-0.02em' }}>
+              {provider.name}
+            </span>
             {provider.isVerified && (
-              <span className="ml-1.5 bg-secondary text-white text-[10px] font-semibold rounded-full px-2 py-0.5">
-                認證
-              </span>
+              <span className="area-badge">認證</span>
             )}
           </div>
-          <p className="text-[13px] text-muted mb-1.5">{categoryLabel} · {provider.district}</p>
-          <p className="text-[13px] text-muted line-clamp-2">{provider.description}</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#8a8a80', marginBottom: 8 }}>
+            {categoryLabel} · {provider.district}
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#6a6a62', lineHeight: 1.6 }} className="line-clamp-2">
+            {provider.description}
+          </p>
         </div>
 
         <div className="flex flex-col items-end">
           <button
             onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
-            className="text-lg mb-1.5 hover:scale-110 transition-transform"
+            className="text-lg mb-2 hover:scale-110 transition-transform"
           >
             {isFavorite ? '❤️' : '🤍'}
           </button>
           <div className="flex items-center mb-1">
             <span className="text-xs">{'👍'.repeat(filledThumbs)}</span>
           </div>
-          <span className="text-sm font-semibold text-foreground">
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: '#1a1a18' }}>
             {provider.rating}
-            <span className="text-xs text-muted font-normal"> ({provider.reviewCount})</span>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#8a8a80', fontWeight: 400 }}> ({provider.reviewCount})</span>
           </span>
-          <span className="text-[13px] text-secondary font-medium mt-0.5">{priceRange}</span>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#4a6741', fontWeight: 600, marginTop: 2 }}>{priceRange}</span>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mt-2.5">
+      <div className="flex flex-wrap gap-2 mt-3">
         {provider.services.slice(0, 3).map((service) => (
-          <span key={service.id} className="bg-accent/40 rounded-full px-2.5 py-1 text-xs text-secondary font-medium">
+          <span key={service.id} className="area-chip">
             {service.name}
           </span>
         ))}
         {provider.services.length > 3 && (
-          <span className="bg-accent/40 rounded-full px-2.5 py-1 text-xs text-secondary font-medium">
+          <span className="area-chip">
             +{provider.services.length - 3}
           </span>
         )}
@@ -81,69 +85,131 @@ export default function HomePage() {
 
   if (state.isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen" style={{ background: '#f0f4ed' }}>
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#4a6741', borderTopColor: 'transparent' }} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="pt-5 px-5">
-        <h1 className="text-[28px] font-bold text-foreground mb-1 font-heading tracking-tight">BeautyBook</h1>
-        <p className="text-sm text-muted mb-3">找到你附近最好的美容服務</p>
+    <div className="min-h-screen" style={{ background: '#f0f4ed' }}>
+      {/* Area-style Hero Header */}
+      <div className="area-hero px-6 pt-12 pb-8">
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 36,
+          fontWeight: 700,
+          color: '#f0f4ed',
+          letterSpacing: '-0.03em',
+          lineHeight: 1.1,
+          marginBottom: 8,
+          position: 'relative',
+          zIndex: 1,
+        }}>
+          BeautyBook
+        </h1>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 14,
+          color: 'rgba(240,244,237,0.6)',
+          lineHeight: 1.7,
+          position: 'relative',
+          zIndex: 1,
+          marginBottom: 20,
+        }}>
+          找到你附近最好的美容服務
+        </p>
 
         {/* Booking Mode Toggle */}
-        <div className="flex gap-2 mb-4">
-          <button className="flex-1 rounded-full border-2 border-secondary bg-accent/30 py-2.5 text-center">
-            <span className="text-sm text-secondary font-semibold">🔍 自己選擇</span>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 16, position: 'relative', zIndex: 1 }}>
+          <button style={{
+            flex: 1,
+            background: 'rgba(255,255,255,0.12)',
+            border: '1.5px solid rgba(255,255,255,0.25)',
+            borderRadius: 24,
+            padding: '10px 0',
+            cursor: 'pointer',
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 13,
+            color: '#fff',
+            fontWeight: 600,
+          }}>
+            🔍 自己選擇
           </button>
           <button
             onClick={() => router.push('/matching')}
-            className="flex-1 rounded-full border border-border py-2.5 text-center"
+            style={{
+              flex: 1,
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 24,
+              padding: '10px 0',
+              cursor: 'pointer',
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 13,
+              color: 'rgba(255,255,255,0.5)',
+              fontWeight: 500,
+            }}
           >
-            <span className="text-sm text-foreground font-medium">🤖 智能媒合</span>
+            🤖 智能媒合
           </button>
         </div>
 
         {/* Search Bar */}
-        <div className="flex items-center bg-surface rounded-full border border-border px-4 h-11 mb-4">
-          <span className="text-base text-muted mr-2">🔍</span>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: 24,
+          border: '1px solid rgba(255,255,255,0.12)',
+          padding: '0 16px',
+          height: 44,
+          position: 'relative',
+          zIndex: 1,
+        }}>
+          <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginRight: 8 }}>🔍</span>
           <input
             type="text"
             placeholder="搜尋店家、服務、設計師..."
             value={state.searchQuery}
             onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
-            className="flex-1 text-[15px] text-foreground bg-transparent placeholder:text-muted"
+            style={{
+              flex: 1,
+              background: 'transparent',
+              border: 'none',
+              color: '#fff',
+              fontSize: 14,
+              fontFamily: "'DM Sans', sans-serif",
+              outline: 'none',
+            }}
           />
           {state.searchQuery.length > 0 && (
-            <button onClick={() => dispatch({ type: 'SET_SEARCH', payload: '' })} className="text-base text-muted">
+            <button onClick={() => dispatch({ type: 'SET_SEARCH', payload: '' })} style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer' }}>
               ✕
             </button>
           )}
         </div>
+      </div>
 
+      {/* Content area */}
+      <div className="px-5 pt-5">
         {/* City Filter */}
         <button
           onClick={() => setShowCityFilter(!showCityFilter)}
-          className="flex items-center mb-3"
+          style={{ display: 'flex', alignItems: 'center', marginBottom: 12, background: 'none', border: 'none', cursor: 'pointer' }}
         >
-          <span className="text-[13px] text-muted mr-1">📍</span>
-          <span className={`text-[13px] font-medium ${state.selectedCity ? 'text-secondary' : 'text-muted'}`}>
+          <span style={{ fontSize: 13, color: '#8a8a80', marginRight: 4 }}>📍</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: state.selectedCity ? '#4a6741' : '#8a8a80', fontFamily: "'DM Sans', sans-serif" }}>
             {state.selectedCity || '全部地區'}
           </span>
-          <span className="text-[10px] text-muted ml-1">▼</span>
+          <span style={{ fontSize: 10, color: '#8a8a80', marginLeft: 4 }}>▼</span>
         </button>
 
         {showCityFilter && (
           <div className="flex overflow-x-auto hide-scrollbar mb-3 gap-2">
             <button
               onClick={() => { dispatch({ type: 'SET_CITY', payload: null }); setShowCityFilter(false); }}
-              className={`shrink-0 px-3.5 py-1.5 rounded-full border text-[13px] transition-all ${
-                !state.selectedCity
-                  ? 'bg-secondary text-white border-secondary'
-                  : 'bg-surface text-foreground border-border'
-              }`}
+              className={!state.selectedCity ? 'area-chip area-chip-active' : 'area-chip'}
             >
               全部
             </button>
@@ -151,11 +217,8 @@ export default function HomePage() {
               <button
                 key={city}
                 onClick={() => { dispatch({ type: 'SET_CITY', payload: city }); setShowCityFilter(false); }}
-                className={`shrink-0 px-3.5 py-1.5 rounded-full border text-[13px] transition-all ${
-                  state.selectedCity === city
-                    ? 'bg-secondary text-white border-secondary'
-                    : 'bg-surface text-foreground border-border'
-                }`}
+                className={state.selectedCity === city ? 'area-chip area-chip-active' : 'area-chip'}
+                style={{ whiteSpace: 'nowrap' }}
               >
                 {city}
               </button>
@@ -164,14 +227,10 @@ export default function HomePage() {
         )}
 
         {/* Category Filter */}
-        <div className="flex overflow-x-auto hide-scrollbar mb-2 gap-2">
+        <div className="flex overflow-x-auto hide-scrollbar mb-4 gap-2">
           <button
             onClick={() => dispatch({ type: 'SET_CATEGORY', payload: null })}
-            className={`shrink-0 px-4 py-2 rounded-full border text-sm font-medium transition-all ${
-              !state.selectedCategory
-                ? 'bg-secondary text-white border-secondary'
-                : 'bg-surface text-foreground border-border'
-            }`}
+            className={!state.selectedCategory ? 'area-chip area-chip-active' : 'area-chip'}
           >
             全部
           </button>
@@ -179,25 +238,27 @@ export default function HomePage() {
             <button
               key={cat}
               onClick={() => dispatch({ type: 'SET_CATEGORY', payload: state.selectedCategory === cat ? null : cat })}
-              className={`shrink-0 px-4 py-2 rounded-full border text-sm font-medium transition-all ${
-                state.selectedCategory === cat
-                  ? 'bg-secondary text-white border-secondary'
-                  : 'bg-surface text-foreground border-border'
-              }`}
+              className={state.selectedCategory === cat ? 'area-chip area-chip-active' : 'area-chip'}
+              style={{ whiteSpace: 'nowrap' }}
             >
               {SERVICE_CATEGORY_ICONS[cat]} {SERVICE_CATEGORY_LABELS[cat]}
             </button>
           ))}
         </div>
+
+        <hr className="area-divider" style={{ marginBottom: 16 }} />
       </div>
 
       {/* Results */}
-      <div className="px-5 pt-3 pb-5">
-        <p className="text-[13px] text-muted mb-3">{filteredProviders.length} 間店家</p>
+      <div className="px-5 pb-8">
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#8a8a80', marginBottom: 16, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          {filteredProviders.length} 間店家
+        </p>
         {filteredProviders.length === 0 ? (
           <div className="text-center pt-16">
-            <div className="text-[40px] mb-3">🔍</div>
-            <p className="text-base text-muted">沒有找到符合條件的店家</p>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🔍</div>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#1a1a18', marginBottom: 4 }}>沒有找到符合條件的店家</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#8a8a80' }}>試試其他搜尋條件</p>
           </div>
         ) : (
           filteredProviders.map((provider) => (
