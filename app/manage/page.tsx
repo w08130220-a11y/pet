@@ -136,24 +136,46 @@ export default function ManagePage() {
     }
   };
 
-  const inputCls = 'w-full bg-surface border border-border rounded-lg px-3.5 py-3 text-[15px] text-foreground placeholder:text-muted mb-4';
+  const inputCls = 'w-full rounded-lg px-3.5 py-3 text-[15px] mb-4';
 
   // ── Not registered ──
   if (!isProvider && !isRegistering) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="pt-5 px-5">
-          <h1 className="text-[28px] font-bold text-foreground mb-4 font-heading tracking-tight">業者中心</h1>
+      <div className="min-h-screen" style={{ background: '#f0f4ed' }}>
+        {/* Area Hero Header */}
+        <div className="area-hero px-6 pt-12 pb-6">
+          <h1 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 28,
+            fontWeight: 700,
+            color: '#f0f4ed',
+            letterSpacing: '-0.03em',
+            position: 'relative',
+            zIndex: 1,
+            marginBottom: 4,
+          }}>
+            業者中心
+          </h1>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 14,
+            color: 'rgba(240,244,237,0.6)',
+            position: 'relative',
+            zIndex: 1,
+          }}>
+            管理你的店家與服務
+          </p>
         </div>
         <div className="flex flex-col items-center justify-center px-10 pt-20">
           <div className="text-5xl mb-5">🏪</div>
-          <h2 className="text-xl font-semibold text-foreground mb-2 text-center">成為美容業者</h2>
-          <p className="text-sm text-muted text-center mb-6 leading-5">
+          <h2 className="text-xl font-semibold mb-2 text-center" style={{ color: '#1a1a18', fontFamily: "'Playfair Display', serif" }}>成為美容業者</h2>
+          <p className="text-sm text-center mb-6 leading-5" style={{ color: '#8a8a80' }}>
             註冊成為業者，上傳你的服務項目與空閒時段，讓客戶直接預約你的服務。
           </p>
           <button
             onClick={() => setIsRegistering(true)}
-            className="bg-secondary rounded-full py-3.5 px-10 text-base font-semibold text-white"
+            className="rounded-full py-3.5 px-10 text-base font-semibold"
+            style={{ background: '#4a6741', color: '#fff' }}
           >
             立即註冊
           </button>
@@ -165,50 +187,72 @@ export default function ManagePage() {
   // ── Registration Form ──
   if (isRegistering) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="pt-5 px-5">
-          <div className="flex items-center mb-4">
-            <button onClick={() => setIsRegistering(false)} className="mr-3 text-base text-muted">← 返回</button>
-            <h1 className="text-[22px] font-bold text-foreground font-heading">店家註冊</h1>
+      <div className="min-h-screen" style={{ background: '#f0f4ed' }}>
+        {/* Area Hero Header */}
+        <div className="area-hero px-6 pt-12 pb-6">
+          <div className="flex items-center" style={{ position: 'relative', zIndex: 1 }}>
+            <button onClick={() => setIsRegistering(false)} className="mr-3 text-base" style={{ color: 'rgba(240,244,237,0.6)' }}>← 返回</button>
           </div>
+          <h1 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 28,
+            fontWeight: 700,
+            color: '#f0f4ed',
+            letterSpacing: '-0.03em',
+            position: 'relative',
+            zIndex: 1,
+            marginBottom: 4,
+            marginTop: 8,
+          }}>
+            店家註冊
+          </h1>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 14,
+            color: 'rgba(240,244,237,0.6)',
+            position: 'relative',
+            zIndex: 1,
+          }}>
+            填寫你的店家資訊
+          </p>
         </div>
-        <div className="px-5 pb-10">
-          <label className="block text-sm font-medium text-foreground mb-1.5">店家名稱 *</label>
-          <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="例：Nail Room 指尖藝術" className={inputCls} />
+        <div className="px-5 pt-4 pb-10">
+          <label className="block text-sm font-medium mb-1.5" style={{ color: '#1a1a18' }}>店家名稱 *</label>
+          <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="例：Nail Room 指尖藝術" className={inputCls} style={{ background: '#fff', border: '1px solid #e8ede6', color: '#1a1a18' }} />
 
-          <label className="block text-sm font-medium text-foreground mb-1.5">服務類型 *</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: '#1a1a18' }}>服務類型 *</label>
           <div className="flex flex-wrap gap-2 mb-4">
             {CATEGORIES.map((cat) => (
               <button key={cat} onClick={() => setForm({ ...form, category: cat })}
-                className={`px-3.5 py-2 rounded-full border text-sm ${form.category === cat ? 'bg-secondary text-white border-secondary' : 'bg-surface text-foreground border-border'}`}>
+                className={`px-3.5 py-2 rounded-full text-sm ${form.category === cat ? 'area-chip area-chip-active' : 'area-chip'}`}>
                 {SERVICE_CATEGORY_ICONS[cat]} {SERVICE_CATEGORY_LABELS[cat]}
               </button>
             ))}
           </div>
 
-          <label className="block text-sm font-medium text-foreground mb-1.5">城市 *</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: '#1a1a18' }}>城市 *</label>
           <div className="flex overflow-x-auto hide-scrollbar mb-4 gap-2">
             {CITIES.map((city) => (
               <button key={city} onClick={() => setForm({ ...form, city })}
-                className={`shrink-0 px-3.5 py-2 rounded-full border text-sm ${form.city === city ? 'bg-secondary text-white border-secondary' : 'bg-surface text-foreground border-border'}`}>
+                className={`shrink-0 px-3.5 py-2 rounded-full text-sm ${form.city === city ? 'area-chip area-chip-active' : 'area-chip'}`}>
                 {city}
               </button>
             ))}
           </div>
 
-          <label className="block text-sm font-medium text-foreground mb-1.5">區域</label>
-          <input value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} placeholder="例：大安區" className={inputCls} />
+          <label className="block text-sm font-medium mb-1.5" style={{ color: '#1a1a18' }}>區域</label>
+          <input value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} placeholder="例：大安區" className={inputCls} style={{ background: '#fff', border: '1px solid #e8ede6', color: '#1a1a18' }} />
 
-          <label className="block text-sm font-medium text-foreground mb-1.5">詳細地址 *</label>
-          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="例：忠孝東路四段155號3樓" className={inputCls} />
+          <label className="block text-sm font-medium mb-1.5" style={{ color: '#1a1a18' }}>詳細地址 *</label>
+          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="例：忠孝東路四段155號3樓" className={inputCls} style={{ background: '#fff', border: '1px solid #e8ede6', color: '#1a1a18' }} />
 
-          <label className="block text-sm font-medium text-foreground mb-1.5">聯絡電話 *</label>
-          <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="02-1234-5678" type="tel" className={inputCls} />
+          <label className="block text-sm font-medium mb-1.5" style={{ color: '#1a1a18' }}>聯絡電話 *</label>
+          <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="02-1234-5678" type="tel" className={inputCls} style={{ background: '#fff', border: '1px solid #e8ede6', color: '#1a1a18' }} />
 
-          <label className="block text-sm font-medium text-foreground mb-1.5">店家介紹</label>
-          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="簡單介紹你的服務特色..." rows={3} className={`${inputCls} resize-none`} />
+          <label className="block text-sm font-medium mb-1.5" style={{ color: '#1a1a18' }}>店家介紹</label>
+          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="簡單介紹你的服務特色..." rows={3} className={`${inputCls} resize-none`} style={{ background: '#fff', border: '1px solid #e8ede6', color: '#1a1a18' }} />
 
-          <button onClick={handleRegister} className="w-full bg-secondary rounded-full py-4 text-base font-semibold text-white">
+          <button onClick={handleRegister} className="w-full rounded-full py-4 text-base font-semibold" style={{ background: '#4a6741', color: '#fff' }}>
             完成註冊
           </button>
         </div>
@@ -252,14 +296,37 @@ export default function ManagePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="pt-5 px-5">
-        <h1 className="text-[28px] font-bold text-foreground mb-1 font-heading tracking-tight">業者中心</h1>
-        {myProvider && <p className="text-sm text-muted mb-4">{myProvider.name}</p>}
+    <div className="min-h-screen" style={{ background: '#f0f4ed' }}>
+      {/* Area Hero Header */}
+      <div className="area-hero px-6 pt-12 pb-6">
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 28,
+          fontWeight: 700,
+          color: '#f0f4ed',
+          letterSpacing: '-0.03em',
+          position: 'relative',
+          zIndex: 1,
+          marginBottom: 4,
+        }}>
+          業者中心
+        </h1>
+        {myProvider && <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 14,
+          color: 'rgba(240,244,237,0.6)',
+          position: 'relative',
+          zIndex: 1,
+        }}>
+          {myProvider.name}
+        </p>}
+      </div>
+
+      <div className="px-5 pt-4">
         <div className="flex overflow-x-auto hide-scrollbar mb-4 gap-2">
           {tabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`shrink-0 px-4 py-2 rounded-full border text-sm font-medium ${activeTab === tab.key ? 'bg-secondary text-white border-secondary' : 'bg-surface text-foreground border-border'}`}>
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === tab.key ? 'area-chip area-chip-active' : 'area-chip'}`}>
               {tab.label}
             </button>
           ))}
@@ -272,35 +339,36 @@ export default function ManagePage() {
           <>
             <div className="flex gap-3 mb-5">
               {[
-                { label: '今日預約', value: String(todayOrders.length), color: 'var(--color-primary)' },
+                { label: '今日預約', value: String(todayOrders.length), color: '#4a6741' },
                 { label: '總評分', value: myProvider?.rating ? String(myProvider.rating) : '—', color: '#F5A623' },
-                { label: '總評價數', value: String(myProvider?.reviewCount || 0), color: 'var(--color-secondary)' },
+                { label: '總評價數', value: String(myProvider?.reviewCount || 0), color: '#4a6741' },
               ].map((stat) => (
-                <div key={stat.label} className="flex-1 bg-surface rounded-xl border border-border p-4 text-center">
+                <div key={stat.label} className="area-card flex-1 p-4 text-center">
                   <p className="text-2xl font-bold mb-1" style={{ color: stat.color }}>{stat.value}</p>
-                  <p className="text-xs text-muted">{stat.label}</p>
+                  <p style={{ fontSize: 12, color: '#8a8a80' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
 
-            <h2 className="text-base font-semibold text-foreground mb-3">今日預約</h2>
+            <h2 className="text-base font-semibold mb-3" style={{ color: '#1a1a18', fontFamily: "'Playfair Display', serif" }}>今日預約</h2>
             {todayOrders.length === 0 ? (
-              <div className="bg-surface rounded-xl border border-border p-6 text-center">
-                <p className="text-sm text-muted">今日暫無預約</p>
+              <div className="area-card p-6 text-center">
+                <p style={{ fontSize: 14, color: '#8a8a80' }}>今日暫無預約</p>
               </div>
             ) : (
               todayOrders.map((order) => (
-                <div key={order.id} className="bg-surface rounded-xl border border-border p-3.5 mb-2">
+                <div key={order.id} className="area-card p-3.5 mb-2">
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-[15px] font-medium text-foreground">{order.time} — {order.serviceName}</p>
-                      <p className="text-[13px] text-muted mt-0.5">{order.staffName} · {order.duration}分鐘</p>
+                      <p style={{ fontSize: 15, fontWeight: 500, color: '#1a1a18' }}>{order.time} — {order.serviceName}</p>
+                      <p style={{ fontSize: 13, color: '#8a8a80', marginTop: 2 }}>{order.staffName} · {order.duration}分鐘</p>
                     </div>
-                    <span className="text-[15px] font-semibold text-foreground">${order.totalPrice}</span>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: '#1a1a18' }}>${order.totalPrice}</span>
                   </div>
                   {(order.status === 'confirmed' || order.status === 'pending') && (
                     <button onClick={() => handleProviderCancel(order.id)}
-                      className="mt-2 w-full py-2 rounded-lg border border-error text-[13px] text-error">
+                      className="mt-2 w-full py-2 rounded-lg text-[13px]"
+                      style={{ border: '1px solid #a85a4a', color: '#a85a4a' }}>
                       商家取消預約
                     </button>
                   )}
@@ -314,22 +382,23 @@ export default function ManagePage() {
         {activeTab === 'orders' && (
           <>
             {myOrders.length === 0 ? (
-              <div className="text-center pt-16"><p className="text-sm text-muted">尚無訂單</p></div>
+              <div className="text-center pt-16"><p style={{ fontSize: 14, color: '#8a8a80' }}>尚無訂單</p></div>
             ) : (
               [...myOrders].reverse().map((order) => (
-                <div key={order.id} className="bg-surface rounded-xl border border-border p-3.5 mb-2">
+                <div key={order.id} className="area-card p-3.5 mb-2">
                   <div className="flex justify-between mb-1.5">
-                    <span className="text-[15px] font-medium text-foreground">{order.serviceName}</span>
-                    <span className={`text-xs ${order.status === 'provider_cancelled' ? 'text-error' : 'text-muted'}`}>
+                    <span style={{ fontSize: 15, fontWeight: 500, color: '#1a1a18' }}>{order.serviceName}</span>
+                    <span style={{ fontSize: 12, color: order.status === 'provider_cancelled' ? '#a85a4a' : '#8a8a80' }}>
                       {BOOKING_STATUS_LABELS[order.status]}
                     </span>
                   </div>
-                  <p className="text-[13px] text-muted">
+                  <p style={{ fontSize: 13, color: '#8a8a80' }}>
                     {order.date} {order.time} · {order.staffName} · ${order.totalPrice}
                   </p>
                   {(order.status === 'confirmed' || order.status === 'pending') && (
                     <button onClick={() => handleProviderCancel(order.id)}
-                      className="mt-2 w-full py-2 rounded-lg border border-error text-[13px] text-error">
+                      className="mt-2 w-full py-2 rounded-lg text-[13px]"
+                      style={{ border: '1px solid #a85a4a', color: '#a85a4a' }}>
                       商家取消預約
                     </button>
                   )}
@@ -343,54 +412,55 @@ export default function ManagePage() {
         {activeTab === 'services' && myProvider && (
           <>
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[13px] text-muted">{myProvider.services.length} 項服務</span>
+              <span style={{ fontSize: 13, color: '#8a8a80' }}>{myProvider.services.length} 項服務</span>
               <button onClick={() => setShowAddService(!showAddService)}
-                className="bg-secondary rounded-full px-3.5 py-2 text-[13px] font-semibold text-white">
+                className="rounded-full px-3.5 py-2 text-[13px] font-semibold"
+                style={{ background: '#4a6741', color: '#fff' }}>
                 + 新增服務
               </button>
             </div>
 
             {showAddService && (
-              <div className="bg-surface rounded-xl border-2 border-secondary p-4 mb-3">
-                <h3 className="text-[15px] font-semibold text-foreground mb-3">新增服務項目</h3>
-                <input value={serviceForm.name} onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })} placeholder="服務名稱 *" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
-                <input value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} placeholder="服務描述" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
+              <div className="area-card p-4 mb-3" style={{ borderWidth: 2, borderColor: '#4a6741' }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1a1a18', marginBottom: 12, fontFamily: "'Playfair Display', serif" }}>新增服務項目</h3>
+                <input value={serviceForm.name} onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })} placeholder="服務名稱 *" className="w-full rounded-lg px-3.5 py-2.5 text-sm mb-2.5" style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }} />
+                <input value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} placeholder="服務描述" className="w-full rounded-lg px-3.5 py-2.5 text-sm mb-2.5" style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }} />
                 <div className="flex gap-2.5 mb-2.5">
-                  <input value={serviceForm.duration} onChange={(e) => setServiceForm({ ...serviceForm, duration: e.target.value })} placeholder="時長(分鐘)" type="number" className="flex-1 bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted" />
-                  <input value={serviceForm.price} onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })} placeholder="價格(NTD) *" type="number" className="flex-1 bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted" />
+                  <input value={serviceForm.duration} onChange={(e) => setServiceForm({ ...serviceForm, duration: e.target.value })} placeholder="時長(分鐘)" type="number" className="flex-1 rounded-lg px-3.5 py-2.5 text-sm" style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }} />
+                  <input value={serviceForm.price} onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })} placeholder="價格(NTD) *" type="number" className="flex-1 rounded-lg px-3.5 py-2.5 text-sm" style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }} />
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={handleAddService} className="flex-1 bg-secondary rounded-full py-3 text-sm font-semibold text-white">確認新增</button>
-                  <button onClick={() => setShowAddService(false)} className="flex-1 rounded-lg border border-border py-3 text-sm text-muted">取消</button>
+                  <button onClick={handleAddService} className="flex-1 rounded-full py-3 text-sm font-semibold" style={{ background: '#4a6741', color: '#fff' }}>確認新增</button>
+                  <button onClick={() => setShowAddService(false)} className="flex-1 rounded-lg py-3 text-sm" style={{ border: '1px solid #e8ede6', color: '#8a8a80' }}>取消</button>
                 </div>
               </div>
             )}
 
             {myProvider.services.map((service) => (
-              <div key={service.id} className="bg-surface rounded-xl border border-border p-3.5 mb-2">
+              <div key={service.id} className="area-card p-3.5 mb-2">
                 <div className="flex justify-between items-center">
                   <div className="flex-1">
-                    <p className="text-[15px] font-medium text-foreground">{service.name}</p>
-                    <p className="text-[13px] text-muted mt-0.5">{service.description} · {service.duration}分鐘</p>
+                    <p style={{ fontSize: 15, fontWeight: 500, color: '#1a1a18' }}>{service.name}</p>
+                    <p style={{ fontSize: 13, color: '#8a8a80', marginTop: 2 }}>{service.description} · {service.duration}分鐘</p>
                   </div>
                   {editingServiceId === service.id ? (
                     <div className="flex items-center gap-1.5">
                       <input value={editPrice} onChange={(e) => setEditPrice(e.target.value)} type="number"
                         placeholder={String(service.price)}
-                        className="w-20 border border-secondary rounded-md px-2 py-1 text-sm text-foreground text-right" />
-                      <button onClick={() => handleUpdatePrice(service.id)} className="text-sm text-secondary font-semibold">✓</button>
-                      <button onClick={() => { setEditingServiceId(null); setEditPrice(''); }} className="text-sm text-muted">✕</button>
+                        className="w-20 rounded-md px-2 py-1 text-sm text-right" style={{ border: '1px solid #4a6741', color: '#1a1a18' }} />
+                      <button onClick={() => handleUpdatePrice(service.id)} className="text-sm font-semibold" style={{ color: '#4a6741' }}>✓</button>
+                      <button onClick={() => { setEditingServiceId(null); setEditPrice(''); }} className="text-sm" style={{ color: '#8a8a80' }}>✕</button>
                     </div>
                   ) : (
                     <button onClick={() => { setEditingServiceId(service.id); setEditPrice(String(service.price)); }}
                       className="text-right">
-                      <p className="text-base font-semibold text-foreground">${service.price}</p>
-                      <p className="text-[10px] text-secondary">點擊修改</p>
+                      <p className="text-base font-semibold" style={{ color: '#1a1a18' }}>${service.price}</p>
+                      <p style={{ fontSize: 10, color: '#4a6741' }}>點擊修改</p>
                     </button>
                   )}
                 </div>
                 <div className="mt-2 text-right">
-                  <button onClick={() => handleDeleteService(service.id)} className="text-xs text-error">刪除服務</button>
+                  <button onClick={() => handleDeleteService(service.id)} style={{ fontSize: 12, color: '#a85a4a' }}>刪除服務</button>
                 </div>
               </div>
             ))}
@@ -401,39 +471,40 @@ export default function ManagePage() {
         {activeTab === 'staff' && myProvider && (
           <>
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[13px] text-muted">{myProvider.staffMembers.length} 位人員</span>
+              <span style={{ fontSize: 13, color: '#8a8a80' }}>{myProvider.staffMembers.length} 位人員</span>
               <button onClick={() => setShowAddStaff(!showAddStaff)}
-                className="bg-secondary rounded-full px-3.5 py-2 text-[13px] font-semibold text-white">
+                className="rounded-full px-3.5 py-2 text-[13px] font-semibold"
+                style={{ background: '#4a6741', color: '#fff' }}>
                 + 新增人員
               </button>
             </div>
 
             {showAddStaff && (
-              <div className="bg-surface rounded-xl border-2 border-secondary p-4 mb-3">
-                <h3 className="text-[15px] font-semibold text-foreground mb-3">新增服務人員</h3>
-                <input value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} placeholder="姓名 *" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
-                <input value={staffForm.title} onChange={(e) => setStaffForm({ ...staffForm, title: e.target.value })} placeholder="職稱 * (例：設計師、美甲師)" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
-                <input value={staffForm.specialties} onChange={(e) => setStaffForm({ ...staffForm, specialties: e.target.value })} placeholder="專長 (用「、」分隔)" className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5" />
+              <div className="area-card p-4 mb-3" style={{ borderWidth: 2, borderColor: '#4a6741' }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1a1a18', marginBottom: 12, fontFamily: "'Playfair Display', serif" }}>新增服務人員</h3>
+                <input value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} placeholder="姓名 *" className="w-full rounded-lg px-3.5 py-2.5 text-sm mb-2.5" style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }} />
+                <input value={staffForm.title} onChange={(e) => setStaffForm({ ...staffForm, title: e.target.value })} placeholder="職稱 * (例：設計師、美甲師)" className="w-full rounded-lg px-3.5 py-2.5 text-sm mb-2.5" style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }} />
+                <input value={staffForm.specialties} onChange={(e) => setStaffForm({ ...staffForm, specialties: e.target.value })} placeholder="專長 (用「、」分隔)" className="w-full rounded-lg px-3.5 py-2.5 text-sm mb-2.5" style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }} />
                 <div className="flex gap-2">
-                  <button onClick={handleAddStaff} className="flex-1 bg-secondary rounded-full py-3 text-sm font-semibold text-white">確認新增</button>
-                  <button onClick={() => setShowAddStaff(false)} className="flex-1 rounded-lg border border-border py-3 text-sm text-muted">取消</button>
+                  <button onClick={handleAddStaff} className="flex-1 rounded-full py-3 text-sm font-semibold" style={{ background: '#4a6741', color: '#fff' }}>確認新增</button>
+                  <button onClick={() => setShowAddStaff(false)} className="flex-1 rounded-lg py-3 text-sm" style={{ border: '1px solid #e8ede6', color: '#8a8a80' }}>取消</button>
                 </div>
               </div>
             )}
 
             {myProvider.staffMembers.map((staff) => (
-              <div key={staff.id} className="bg-surface rounded-xl border border-border p-3.5 mb-2 flex items-center">
-                <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center mr-3">
+              <div key={staff.id} className="area-card p-3.5 mb-2 flex items-center">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ background: '#f0f4ed' }}>
                   <span className="text-base">👤</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-[15px] font-medium text-foreground">{staff.name}</p>
-                  <p className="text-xs text-muted">{staff.title}</p>
+                  <p style={{ fontSize: 15, fontWeight: 500, color: '#1a1a18' }}>{staff.name}</p>
+                  <p style={{ fontSize: 12, color: '#8a8a80' }}>{staff.title}</p>
                   {staff.specialties.length > 0 && (
-                    <p className="text-xs text-muted mt-0.5">{staff.specialties.join('、')}</p>
+                    <p style={{ fontSize: 12, color: '#8a8a80', marginTop: 2 }}>{staff.specialties.join('、')}</p>
                   )}
                 </div>
-                <button onClick={() => handleDeleteStaff(staff.id)} className="p-2 text-[13px] text-error">
+                <button onClick={() => handleDeleteStaff(staff.id)} className="p-2" style={{ fontSize: 13, color: '#a85a4a' }}>
                   刪除
                 </button>
               </div>
@@ -444,19 +515,19 @@ export default function ManagePage() {
         {/* Photos */}
         {activeTab === 'photos' && myProvider && (
           <>
-            <p className="text-[13px] text-muted mb-3">
+            <p style={{ fontSize: 13, color: '#8a8a80', marginBottom: 12 }}>
               店鋪相簿（最多 6 張）· 目前 {myProvider.photos?.length || 0} 張
             </p>
             <div className="grid grid-cols-2 gap-2.5 mb-4">
               {(myProvider.photos || []).slice(0, 6).map((_, index) => (
-                <div key={index} className="aspect-square rounded-xl bg-border flex items-center justify-center">
-                  <span className="text-xs text-muted">照片 {index + 1}</span>
+                <div key={index} className="aspect-square rounded-xl flex items-center justify-center" style={{ background: '#e8ede6' }}>
+                  <span style={{ fontSize: 12, color: '#8a8a80' }}>照片 {index + 1}</span>
                 </div>
               ))}
               {(myProvider.photos?.length || 0) < 6 && (
-                <div className="aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer">
-                  <span className="text-[28px] text-muted">+</span>
-                  <span className="text-xs text-muted mt-1">上傳照片</span>
+                <div className="aspect-square rounded-xl flex flex-col items-center justify-center cursor-pointer" style={{ border: '2px dashed #e8ede6' }}>
+                  <span style={{ fontSize: 28, color: '#8a8a80' }}>+</span>
+                  <span style={{ fontSize: 12, color: '#8a8a80', marginTop: 4 }}>上傳照片</span>
                 </div>
               )}
             </div>
@@ -467,43 +538,47 @@ export default function ManagePage() {
         {activeTab === 'portfolio' && myProvider && (
           <>
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[13px] text-muted">{myPortfolio.length} 件作品</span>
+              <span style={{ fontSize: 13, color: '#8a8a80' }}>{myPortfolio.length} 件作品</span>
               <button onClick={() => setShowAddPortfolio(!showAddPortfolio)}
-                className="bg-secondary rounded-full px-3.5 py-2 text-[13px] font-semibold text-white">
+                className="rounded-full px-3.5 py-2 text-[13px] font-semibold"
+                style={{ background: '#4a6741', color: '#fff' }}>
                 + 上傳作品
               </button>
             </div>
 
             {myReports.length > 0 && (
-              <div className="bg-orange-50 border border-orange-300 rounded-xl p-3 mb-3">
-                <p className="text-[13px] text-orange-900 font-medium">⚠ 有 {myReports.length} 件作品被檢舉</p>
-                <p className="text-xs text-orange-800 mt-0.5">
+              <div className="rounded-xl p-3 mb-3" style={{ background: 'rgba(196,149,106,0.1)', border: '1px solid rgba(196,149,106,0.3)' }}>
+                <p style={{ fontSize: 13, color: '#1a1a18', fontWeight: 500 }}>⚠ 有 {myReports.length} 件作品被檢舉</p>
+                <p style={{ fontSize: 12, color: '#8a8a80', marginTop: 2 }}>
                   請確認作品為原創，竊取他人作品將導致帳號被列入黑名單。
                 </p>
               </div>
             )}
 
             {showAddPortfolio && (
-              <div className="bg-surface rounded-xl border-2 border-secondary p-4 mb-3">
-                <h3 className="text-[15px] font-semibold text-foreground mb-3">上傳作品</h3>
+              <div className="area-card p-4 mb-3" style={{ borderWidth: 2, borderColor: '#4a6741' }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1a1a18', marginBottom: 12, fontFamily: "'Playfair Display', serif" }}>上傳作品</h3>
                 <input
                   value={portfolioForm.title}
                   onChange={(e) => setPortfolioForm({ ...portfolioForm, title: e.target.value })}
                   placeholder="作品標題 *"
-                  className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5"
+                  className="w-full rounded-lg px-3.5 py-2.5 text-sm mb-2.5"
+                  style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }}
                 />
                 <textarea
                   value={portfolioForm.description}
                   onChange={(e) => setPortfolioForm({ ...portfolioForm, description: e.target.value })}
                   placeholder="作品描述"
                   rows={2}
-                  className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted mb-2.5 resize-none"
+                  className="w-full rounded-lg px-3.5 py-2.5 text-sm mb-2.5 resize-none"
+                  style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }}
                 />
                 {myProvider.staffMembers.length > 0 && (
                   <select
                     value={portfolioForm.staffId}
                     onChange={(e) => setPortfolioForm({ ...portfolioForm, staffId: e.target.value })}
-                    className="w-full bg-background border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground mb-2.5"
+                    className="w-full rounded-lg px-3.5 py-2.5 text-sm mb-2.5"
+                    style={{ background: '#f0f4ed', border: '1px solid #e8ede6', color: '#1a1a18' }}
                   >
                     <option value="">選擇設計師</option>
                     {myProvider.staffMembers.map((s) => (
@@ -511,38 +586,38 @@ export default function ManagePage() {
                     ))}
                   </select>
                 )}
-                <div className="w-full h-[120px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center mb-2.5 cursor-pointer bg-background">
-                  <span className="text-[28px] text-muted">📷</span>
-                  <span className="text-xs text-muted mt-1">點擊上傳作品照片</span>
+                <div className="w-full h-[120px] rounded-lg flex flex-col items-center justify-center mb-2.5 cursor-pointer" style={{ border: '2px dashed #e8ede6', background: '#f0f4ed' }}>
+                  <span style={{ fontSize: 28, color: '#8a8a80' }}>📷</span>
+                  <span style={{ fontSize: 12, color: '#8a8a80', marginTop: 4 }}>點擊上傳作品照片</span>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={handleAddPortfolio} className="flex-1 bg-secondary rounded-full py-3 text-sm font-semibold text-white">確認上傳</button>
-                  <button onClick={() => setShowAddPortfolio(false)} className="flex-1 rounded-lg border border-border py-3 text-sm text-muted">取消</button>
+                  <button onClick={handleAddPortfolio} className="flex-1 rounded-full py-3 text-sm font-semibold" style={{ background: '#4a6741', color: '#fff' }}>確認上傳</button>
+                  <button onClick={() => setShowAddPortfolio(false)} className="flex-1 rounded-lg py-3 text-sm" style={{ border: '1px solid #e8ede6', color: '#8a8a80' }}>取消</button>
                 </div>
               </div>
             )}
 
             {myPortfolio.length === 0 ? (
-              <div className="bg-surface rounded-xl border border-border p-8 text-center">
+              <div className="area-card p-8 text-center">
                 <div className="text-[40px] mb-2">🎨</div>
-                <p className="text-sm text-muted">還沒有上傳作品</p>
-                <p className="text-xs text-muted mt-1">上傳作品展示您的專業技術</p>
+                <p style={{ fontSize: 14, color: '#8a8a80' }}>還沒有上傳作品</p>
+                <p style={{ fontSize: 12, color: '#8a8a80', marginTop: 4 }}>上傳作品展示您的專業技術</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2.5">
                 {myPortfolio.map((item) => (
-                  <div key={item.id} className="bg-surface rounded-xl border border-border overflow-hidden">
-                    <div className="w-full h-[100px] bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                  <div key={item.id} className="area-card overflow-hidden" style={{ padding: 0 }}>
+                    <div className="w-full h-[100px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,216,194,0.3), rgba(74,103,65,0.15))' }}>
                       <span className="text-2xl">🎨</span>
                     </div>
                     <div className="p-2.5">
-                      <p className="text-[13px] font-medium text-foreground truncate">{item.title}</p>
-                      <p className="text-[11px] text-muted truncate">{item.staffName}</p>
+                      <p className="truncate" style={{ fontSize: 13, fontWeight: 500, color: '#1a1a18' }}>{item.title}</p>
+                      <p className="truncate" style={{ fontSize: 11, color: '#8a8a80' }}>{item.staffName}</p>
                       <button
                         onClick={() => {
                           if (confirm('確定要刪除此作品嗎？')) deletePortfolioItem(item.id);
                         }}
-                        className="text-[11px] text-error mt-1"
+                        style={{ fontSize: 11, color: '#a85a4a', marginTop: 4 }}
                       >
                         刪除
                       </button>
@@ -557,26 +632,26 @@ export default function ManagePage() {
         {/* Chat (Provider view) */}
         {activeTab === 'chat' && myProvider && (
           <>
-            <p className="text-[13px] text-muted mb-3">{myChatRooms.length} 則對話</p>
+            <p style={{ fontSize: 13, color: '#8a8a80', marginBottom: 12 }}>{myChatRooms.length} 則對話</p>
             {myChatRooms.length === 0 ? (
-              <div className="bg-surface rounded-xl border border-border p-8 text-center">
+              <div className="area-card p-8 text-center">
                 <div className="text-[40px] mb-2">💬</div>
-                <p className="text-sm text-muted">還沒有客戶訊息</p>
+                <p style={{ fontSize: 14, color: '#8a8a80' }}>還沒有客戶訊息</p>
               </div>
             ) : (
               myChatRooms.map((room) => {
                 const unread = room.unreadCount > 0;
                 return (
-                  <div key={room.id} className="bg-surface rounded-xl border border-border p-3.5 mb-2 flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-accent/40 flex items-center justify-center mr-3">
+                  <div key={room.id} className="area-card p-3.5 mb-2 flex items-center">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ background: 'rgba(200,216,194,0.4)' }}>
                       <span className="text-base">👤</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[15px] font-medium text-foreground">顧客</p>
-                      <p className="text-[13px] text-muted truncate">{room.lastMessage || '新對話'}</p>
+                      <p style={{ fontSize: 15, fontWeight: 500, color: '#1a1a18' }}>顧客</p>
+                      <p className="truncate" style={{ fontSize: 13, color: '#8a8a80' }}>{room.lastMessage || '新對話'}</p>
                     </div>
                     {unread && (
-                      <span className="bg-primary text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="rounded-full w-5 h-5 flex items-center justify-center" style={{ background: '#4a6741', color: '#fff', fontSize: 11, fontWeight: 700 }}>
                         {room.unreadCount}
                       </span>
                     )}
@@ -590,7 +665,7 @@ export default function ManagePage() {
         {/* Schedule */}
         {activeTab === 'schedule' && myProvider && (
           <>
-            <p className="text-[13px] text-muted mb-3">營業時間設定</p>
+            <p style={{ fontSize: 13, color: '#8a8a80', marginBottom: 12 }}>營業時間設定</p>
             {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((day) => {
               const dayLabels: Record<string, string> = {
                 mon: '週一', tue: '週二', wed: '週三', thu: '週四',
@@ -598,9 +673,9 @@ export default function ManagePage() {
               };
               const hours = myProvider.businessHours[day];
               return (
-                <div key={day} className="bg-surface rounded-xl border border-border p-3.5 mb-2 flex justify-between items-center">
-                  <span className="text-[15px] font-medium text-foreground">{dayLabels[day]}</span>
-                  <span className={`text-sm ${hours ? 'text-foreground' : 'text-error'}`}>
+                <div key={day} className="area-card p-3.5 mb-2 flex justify-between items-center">
+                  <span style={{ fontSize: 15, fontWeight: 500, color: '#1a1a18' }}>{dayLabels[day]}</span>
+                  <span style={{ fontSize: 14, color: hours ? '#1a1a18' : '#a85a4a' }}>
                     {hours ? `${hours.open} — ${hours.close}` : '公休'}
                   </span>
                 </div>
