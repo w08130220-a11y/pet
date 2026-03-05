@@ -106,7 +106,7 @@ export default function HomePage() {
           position: 'relative',
           zIndex: 1,
         }}>
-          BeautyBook
+          BeautyBook v2
         </h1>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
