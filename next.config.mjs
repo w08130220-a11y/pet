@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'export',
   distDir: 'docs',
-  basePath: '/pet',
+  basePath: '/beautyWeb',
   images: {
     unoptimized: true,
   },
