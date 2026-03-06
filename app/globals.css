@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-olive-100 text-gray-900 font-sans antialiased;
+  }
+  h1 {
+    @apply text-5xl md:text-7xl font-black tracking-tight;
+  }
+  h2 {
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
+  }
+  h3 {
+    @apply text-xl md:text-2xl font-semibold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-olive-700 text-white
+           px-6 py-2.5 rounded-pill text-sm font-medium
+           hover:bg-olive-800 transition-colors duration-200;
+  }
+  .btn-outline {
+    @apply inline-flex items-center gap-2 border-2 border-olive-700 text-olive-700
+           px-6 py-2.5 rounded-pill text-sm font-medium
+           hover:bg-olive-700 hover:text-white transition-colors duration-200;
+  }
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-full
+           border-2 border-olive-700 text-olive-700
+           hover:bg-olive-700 hover:text-white transition-colors duration-200;
+  }
+  .section-container {
+    @apply max-w-6xl mx-auto px-6 md:px-8;
+  }
+  .card {
+    @apply bg-white/70 backdrop-blur-sm rounded-2xl p-6 md:p-8
+           border border-olive-200/50;
+  }
+  .feature-check {
+    @apply flex items-center gap-3 text-gray-700;
+  }
+  .feature-check::before {
+    content: '✓';
+    @apply text-olive-700 font-bold text-lg;
+  }
+}
