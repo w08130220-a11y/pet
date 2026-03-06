@@ -1,135 +1,264 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   PetLife Style Guideline (from Figma)
+   ============================================ */
+
 :root {
-  --color-primary: #1a1a18;
-  --color-secondary: #4a6741;
-  --color-accent: #c8d8c2;
-  --color-background: #f0f4ed;
-  --color-surface: #ffffff;
-  --color-foreground: #1a1a18;
-  --color-muted: #6a6a62;
-  --color-border: #dde5d8;
-  --color-success: #4a6741;
-  --color-warning: #c4956a;
-  --color-error: #a85a4a;
-  --color-dark: #1a2e1a;
-  --color-dark-surface: #243824;
+  /* --- Color Palette --- */
+  --color-black:        #1A1A18;   /* 近黑 - 主要文字、深色元素 */
+  --color-gray:         #7A7A6C;   /* 橄欖灰 - 次要文字、muted */
+  --color-gray-light:   #C8C8BC;   /* 淺灰 - 邊框、分隔線 */
+  --color-cream:        #F0F0E8;   /* 米白 - 卡片/surface 背景 */
+  --color-olive-light:  #D8E0B8;   /* 淺橄欖 - 淡色標籤、highlight */
+  --color-olive:        #8A9A5A;   /* 中橄欖綠 - 次要強調 */
+  --color-olive-dark:   #4A5A28;   /* 深橄欖綠 - 主要按鈕、CTA */
+
+  /* --- Semantic Tokens --- */
+  --color-primary:      #4A5A28;
+  --color-secondary:    #8A9A5A;
+  --color-accent:       #D8E0B8;
+  --color-background:   #EDF2E8;   /* 頁面背景 - 極淺薄荷綠 */
+  --color-surface:      #F0F0E8;   /* 卡片背景 - 米白 */
+  --color-surface-white:#FFFFFF;
+  --color-foreground:   #1A1A18;
+  --color-muted:        #7A7A6C;
+  --color-border:       #C8C8BC;
+  --color-success:      #8A9A5A;
+  --color-warning:      #C4956A;
+  --color-error:        #A85A4A;
+
+  /* --- Typography --- */
   --font-heading: 'Playfair Display', serif;
   --font-body: 'DM Sans', sans-serif;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ============================================
+   Typography
+   ============================================ */
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   letter-spacing: -0.02em;
+  color: var(--color-black);
 }
 
-input:focus, textarea:focus, select:focus {
-  outline: none;
+/* H1 - Header (大標題，如 Figma "Header") */
+h1 {
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
-/* Hide scrollbar for horizontal scroll areas */
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* H2 - Section title (如 Figma "This Product feature...") */
+h2 {
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
+/* H3 - Subsection title */
+h3 {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
-/* Area-style Hero Header */
-.area-hero {
-  background: linear-gradient(170deg, #1a2e1a 0%, #2d4a2d 60%, #3a5a3a 100%);
-  position: relative;
-  overflow: hidden;
+/* Key point - 重點文字 */
+.text-keypoint {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-black);
 }
-.area-hero::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(122,184,122,0.15) 0%, transparent 70%);
+
+/* Body text - 內文 */
+.text-body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-gray);
+  line-height: 1.6;
+}
+
+/* Label - 標籤文字 */
+.text-label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-olive);
+}
+
+/* UI Text - 介面文字 */
+.text-ui {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+/* ============================================
+   Buttons (Pill shape, 如 Figma)
+   ============================================ */
+
+/* Filled button - 深橄欖綠底白字 */
+.btn-filled {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--color-olive-dark);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 24px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-filled:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 90, 40, 0.3);
+}
+
+/* Outline button - 深色邊框透明底 */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--color-black);
+  border: 1.5px solid var(--color-black);
+  border-radius: 9999px;
+  padding: 10px 24px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-outline:hover {
+  background: rgba(26, 26, 24, 0.05);
+}
+
+/* Small icon button (circle) */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  border: 1.5px solid var(--color-black);
+  background: transparent;
+  color: var(--color-black);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.area-hero::after {
-  content: '';
-  position: absolute;
-  bottom: -30%;
-  left: -10%;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(200,216,194,0.1) 0%, transparent 70%);
-  border-radius: 50%;
+.btn-icon:hover {
+  background: rgba(26, 26, 24, 0.05);
+}
+.btn-icon-filled {
+  background-color: var(--color-olive-dark);
+  color: #FFFFFF;
+  border: none;
+}
+.btn-icon-filled:hover {
+  opacity: 0.9;
 }
 
-/* Area-style card */
-.area-card {
-  background: #fff;
-  border: 1px solid #e8ede6;
+/* ============================================
+   Cards
+   ============================================ */
+
+.card {
+  background: var(--color-surface-white);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   transition: all 0.3s ease;
 }
-.area-card:hover {
-  box-shadow: 0 8px 30px rgba(26,46,26,0.08);
+.card:hover {
+  box-shadow: 0 8px 30px rgba(26, 26, 24, 0.06);
   transform: translateY(-2px);
 }
 
-/* Area-style pill button */
-.area-btn {
-  background-color: #4a6741;
-  color: #fff;
-  border: none;
-  border-radius: 24px;
-  padding: 12px 28px;
-  font-family: var(--font-body);
-  font-size: 14px;
-  cursor: pointer;
-  letter-spacing: 0.01em;
-  transition: all 0.3s ease;
-}
-.area-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(74,103,65,0.3);
+/* ============================================
+   Navigation (如 Figma "Area" navbar)
+   ============================================ */
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--color-surface-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
 }
 
-.area-btn-outline {
-  background: transparent;
-  color: #4a6741;
-  border: 1.5px solid #4a6741;
-  border-radius: 24px;
-  padding: 12px 28px;
-  font-family: var(--font-body);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.area-btn-outline:hover {
-  background: rgba(74,103,65,0.06);
+.nav-logo {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-black);
 }
 
-/* Area-style badge */
-.area-badge {
+/* Glass nav (bottom bar) */
+.nav-glass {
+  background: rgba(237, 242, 232, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Mobile menu overlay */
+.nav-menu {
+  background: var(--color-surface-white);
+  border-radius: 16px;
+  padding: 24px;
+}
+.nav-menu-item {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-black);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ============================================
+   Badge / Chip
+   ============================================ */
+
+.badge {
   display: inline-block;
-  background: #4a6741;
-  color: #fff;
-  border-radius: 20px;
+  background: var(--color-olive-dark);
+  color: #FFFFFF;
+  border-radius: 9999px;
   padding: 3px 10px;
   font-size: 10px;
   font-family: var(--font-body);
@@ -137,50 +266,73 @@ html {
   text-transform: uppercase;
   font-weight: 600;
 }
-.area-badge-light {
-  background: #c8d8c2;
-  color: #2d4a2a;
+.badge-light {
+  background: var(--color-accent);
+  color: var(--color-olive-dark);
 }
 
-/* Area-style glass nav */
-.area-glass {
-  background: rgba(240,244,237,0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(0,0,0,0.04);
-}
-
-/* Area stat number */
-.area-stat {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: #4a6741;
-}
-
-/* Subtle divider */
-.area-divider {
-  border: none;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #dde5d8, transparent);
-  margin: 0;
-}
-
-/* Tag/chip style */
-.area-chip {
+.chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(200,216,194,0.4);
-  color: #3a5a3a;
-  border-radius: 20px;
+  background: rgba(216, 224, 184, 0.4);
+  color: var(--color-olive-dark);
+  border-radius: 9999px;
   padding: 6px 14px;
   font-size: 12px;
   font-family: var(--font-body);
   font-weight: 500;
   transition: all 0.2s ease;
 }
-.area-chip-active {
-  background: #4a6741;
-  color: #fff;
+.chip-active {
+  background: var(--color-olive-dark);
+  color: #FFFFFF;
+}
+
+/* ============================================
+   Feature check item (如 Figma "✓ Ultra-fast browsing")
+   ============================================ */
+
+.feature-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-gray);
+}
+.feature-check::before {
+  content: '✓';
+  color: var(--color-olive-dark);
+  font-weight: 700;
+}
+
+/* ============================================
+   Divider
+   ============================================ */
+
+.divider {
+  border: none;
+  height: 1px;
+  background: var(--color-border);
+  margin: 0;
+}
+.divider-gradient {
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}
+
+/* ============================================
+   Utilities
+   ============================================ */
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
