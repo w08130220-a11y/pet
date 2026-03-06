@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const tabs = [
-  { href: '/', label: '首頁', icon: '🏠' },
-  { href: '/pet-world', label: '寵物世界', icon: '🐾' },
-  { href: '/health', label: '健康', icon: '💚' },
+  { href: '/', label: '探索', icon: '✨' },
+  { href: '/booking', label: '預約', icon: '📅' },
+  { href: '/my-bookings', label: '我的預約', icon: '📋' },
   { href: '/profile', label: '我的', icon: '👤' },
 ];
 

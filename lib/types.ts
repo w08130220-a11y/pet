@@ -1,53 +1,44 @@
-export interface Pet {
+export interface Stylist {
   id: string;
   name: string;
-  species: 'dog' | 'cat' | 'bird' | 'rabbit' | 'other';
-  breed: string;
-  birthDate: string;
-  weight: number;
-  photoUri: string;
-  createdAt: string;
+  avatar: string;
+  salon: string;
+  rating: number;
+  reviewCount: number;
+  specialties: string[];
+  distance?: string;
 }
 
-export interface Post {
+export interface Service {
   id: string;
-  userId: string;
-  userName: string;
-  userAvatar: string;
-  petId: string;
-  petName: string;
+  name: string;
+  category: 'haircut' | 'coloring' | 'treatment' | 'nails' | 'lashes' | 'facial';
+  price: number;
+  duration: number;
+  description: string;
+}
+
+export interface Booking {
+  id: string;
+  stylistId: string;
+  stylistName: string;
+  serviceName: string;
+  date: string;
+  time: string;
+  duration: number;
+  price: number;
+  status: 'upcoming' | 'completed' | 'cancelled';
+  note?: string;
+  rating?: number;
+}
+
+export interface PortfolioItem {
+  id: string;
+  stylistId: string;
+  stylistName: string;
   imageUri: string;
+  category: string;
   caption: string;
   likes: number;
-  comments: number;
   liked: boolean;
-  createdAt: string;
-}
-
-export interface MealRecord {
-  id: string;
-  petId: string;
-  foodType: string;
-  amount: number;
-  calories: number;
-  mealTime: string;
-  createdAt: string;
-}
-
-export interface MedicalRecord {
-  id: string;
-  petId: string;
-  type: 'vaccine' | 'checkup' | 'treatment' | 'other';
-  title: string;
-  description: string;
-  date: string;
-  nextDueDate?: string;
-  veterinarian?: string;
-  createdAt: string;
-}
-
-export interface Scene {
-  id: string;
-  name: string;
-  emoji: string;
 }

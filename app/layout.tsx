@@ -4,8 +4,8 @@ import { AppStoreProvider } from '@/lib/store';
 import BottomNav from '@/components/BottomNav';
 
 export const metadata: Metadata = {
-  title: 'PetLife - 寵物社交 APP',
-  description: '專為寵物主人設計的社交應用程式',
+  title: 'BeautyBook - 美容整合預約平台',
+  description: '探索優質美容師，輕鬆線上預約美容服務',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

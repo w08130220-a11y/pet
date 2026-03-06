@@ -1,81 +1,111 @@
 'use client';
 
-import { useAppStore } from '@/lib/store';
+import { useState } from 'react';
+import { useAppStore, serviceCategories } from '@/lib/store';
 
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins} 分鐘前`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} 小時前`;
-  return `${Math.floor(hours / 24)} 天前`;
-}
+export default function Explore() {
+  const { portfolio, stylists, togglePortfolioLike } = useAppStore();
+  const [activeCategory, setActiveCategory] = useState('all');
 
-export default function Home() {
-  const { posts, toggleLike } = useAppStore();
+  const filtered = activeCategory === 'all'
+    ? portfolio
+    : portfolio.filter(p => p.category === serviceCategories.find(c => c.key === activeCategory)?.label);
 
   return (
     <div className="pb-4">
       {/* Header */}
-      <div className="px-5 pt-8 pb-4 flex items-center justify-between">
+      <div className="px-5 pt-8 pb-4">
         <h1 className="text-[32px] font-bold font-heading tracking-tight" style={{ color: 'var(--color-black)' }}>
-          PetLife
+          BeautyBook
         </h1>
-        <button className="btn-filled text-[13px] py-2 px-5">
-          + 發布
-        </button>
+        <p className="text-body mt-1">探索最新美容趨勢與優質美容師</p>
+      </div>
+
+      {/* Search */}
+      <div className="px-5 mb-4">
+        <div
+          className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+          style={{ background: 'var(--color-cream)', border: '1px solid var(--color-border)' }}
+        >
+          <span>🔍</span>
+          <input
+            type="text"
+            placeholder="搜尋美容師、服務..."
+            className="flex-1 bg-transparent outline-none text-[14px] placeholder:text-muted"
+          />
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="px-5 mb-5 flex gap-2 overflow-x-auto hide-scrollbar">
+        {serviceCategories.map(cat => (
+          <button
+            key={cat.key}
+            onClick={() => setActiveCategory(cat.key)}
+            className={`chip whitespace-nowrap ${activeCategory === cat.key ? 'chip-active' : ''}`}
+          >
+            {cat.emoji} {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Recommended Stylists */}
+      <div className="px-5 mb-5">
+        <p className="text-ui mb-3">推薦美容師</p>
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-1">
+          {stylists.map(s => (
+            <div key={s.id} className="card p-3 min-w-[140px] flex flex-col items-center gap-2">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+                style={{ background: 'var(--color-olive-light)', color: 'var(--color-olive-dark)' }}
+              >
+                {s.name.split(' ')[0][0]}
+              </div>
+              <p className="text-ui text-[13px] text-center">{s.name}</p>
+              <p className="text-label text-[11px]">{s.salon}</p>
+              <div className="flex items-center gap-1">
+                <span className="text-[12px]">⭐</span>
+                <span className="text-[12px] font-medium" style={{ color: 'var(--color-olive-dark)' }}>{s.rating}</span>
+                <span className="text-label text-[10px]">({s.reviewCount})</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <hr className="divider mx-5 mb-4" />
 
-      {/* Posts Feed */}
-      <div className="flex flex-col gap-4 px-5">
-        {posts.map(post => (
-          <article key={post.id} className="card p-4">
-            {/* User info */}
-            <div className="flex items-center gap-3 mb-3">
+      {/* Portfolio Grid */}
+      <div className="px-5">
+        <p className="text-ui mb-3">精選作品</p>
+        <div className="grid grid-cols-2 gap-3">
+          {filtered.map(item => (
+            <div key={item.id} className="card overflow-hidden">
+              {/* Image placeholder */}
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold"
-                style={{ background: 'var(--color-olive-light)', color: 'var(--color-olive-dark)' }}
+                className="w-full aspect-square flex items-center justify-center text-3xl"
+                style={{ background: 'var(--color-cream)' }}
               >
-                {post.userName[0]}
+                {item.category === '染髮' ? '🎨' : item.category === '美甲' ? '💅' : item.category === '美睫' ? '👁️' : item.category === '護髮' ? '💆' : '✂️'}
               </div>
-              <div className="flex-1">
-                <p className="text-ui">{post.userName}</p>
-                <p className="text-label text-[12px]">{post.petName} · {timeAgo(post.createdAt)}</p>
+              <div className="p-3">
+                <p className="text-[12px] font-medium leading-tight" style={{ color: 'var(--color-black)' }}>
+                  {item.caption}
+                </p>
+                <p className="text-label text-[11px] mt-1">{item.stylistName}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="chip text-[10px] py-0.5 px-2">{item.category}</span>
+                  <button
+                    onClick={() => togglePortfolioLike(item.id)}
+                    className="text-[12px]"
+                  >
+                    {item.liked ? '❤️' : '🤍'} {item.likes}
+                  </button>
+                </div>
               </div>
             </div>
-
-            {/* Image placeholder */}
-            <div
-              className="w-full aspect-[4/3] rounded-xl mb-3 flex items-center justify-center text-4xl"
-              style={{ background: 'var(--color-cream)' }}
-            >
-              {post.petName === 'Mochi' ? '🐕' : post.petName === 'Luna' ? '🐱' : '🐶'}
-            </div>
-
-            {/* Caption */}
-            <p className="text-body mb-3" style={{ color: 'var(--color-black)' }}>
-              {post.caption}
-            </p>
-
-            {/* Actions */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => toggleLike(post.id)}
-                className={`flex items-center gap-1.5 text-[13px] font-medium transition-colors ${
-                  post.liked ? 'text-red-500' : ''
-                }`}
-                style={!post.liked ? { color: 'var(--color-gray)' } : undefined}
-              >
-                {post.liked ? '❤️' : '🤍'} {post.likes}
-              </button>
-              <span className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: 'var(--color-gray)' }}>
-                💬 {post.comments}
-              </span>
-            </div>
-          </article>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

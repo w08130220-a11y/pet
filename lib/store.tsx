@@ -1,130 +1,125 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { Pet, Post, MealRecord, MedicalRecord } from './types';
+import { Stylist, Service, Booking, PortfolioItem } from './types';
 
 // --- Mock Data ---
 
-const mockPets: Pet[] = [
+const mockStylists: Stylist[] = [
   {
-    id: '1',
-    name: 'Mochi',
-    species: 'dog',
-    breed: '柴犬',
-    birthDate: '2022-03-15',
-    weight: 10.5,
-    photoUri: '',
-    createdAt: '2024-01-01',
+    id: 's1', name: 'Emily Chen', avatar: '', salon: 'Glow Studio',
+    rating: 4.9, reviewCount: 128, specialties: ['剪髮', '染髮', '造型'],
+    distance: '0.8 km',
   },
   {
-    id: '2',
-    name: 'Luna',
-    species: 'cat',
-    breed: '英國短毛貓',
-    birthDate: '2023-06-20',
-    weight: 4.2,
-    photoUri: '',
-    createdAt: '2024-02-01',
-  },
-];
-
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    userId: 'u1',
-    userName: '小明',
-    userAvatar: '',
-    petId: '1',
-    petName: 'Mochi',
-    imageUri: '',
-    caption: '今天帶 Mochi 去公園散步，玩得超開心！🐕',
-    likes: 24,
-    comments: 5,
-    liked: false,
-    createdAt: '2026-03-06T10:30:00',
+    id: 's2', name: 'Sophie Lin', avatar: '', salon: 'Nail Paradise',
+    rating: 4.8, reviewCount: 96, specialties: ['美甲', '光療', '手部護理'],
+    distance: '1.2 km',
   },
   {
-    id: '2',
-    userId: 'u2',
-    userName: '小美',
-    userAvatar: '',
-    petId: '2',
-    petName: 'Luna',
-    imageUri: '',
-    caption: 'Luna 又在窗邊曬太陽了，好療癒 ☀️',
-    likes: 18,
-    comments: 3,
-    liked: true,
-    createdAt: '2026-03-06T09:15:00',
+    id: 's3', name: 'Mia Wang', avatar: '', salon: 'Lash Bar',
+    rating: 4.7, reviewCount: 73, specialties: ['美睫', '嫁接', '臉部保養'],
+    distance: '2.1 km',
   },
   {
-    id: '3',
-    userId: 'u3',
-    userName: '阿翔',
-    userAvatar: '',
-    petId: '3',
-    petName: 'Cooper',
-    imageUri: '',
-    caption: 'Cooper 學會握手了！訓練了兩週終於成功 🎉',
-    likes: 42,
-    comments: 12,
-    liked: false,
-    createdAt: '2026-03-05T18:00:00',
+    id: 's4', name: 'Ava Liu', avatar: '', salon: 'Hair Artistry',
+    rating: 4.9, reviewCount: 215, specialties: ['染髮', '護髮', '頭皮護理'],
+    distance: '3.0 km',
   },
 ];
 
-const mockMeals: MealRecord[] = [
-  { id: 'm1', petId: '1', foodType: '乾糧', amount: 120, calories: 360, mealTime: '08:00', createdAt: '2026-03-06' },
-  { id: 'm2', petId: '1', foodType: '雞胸肉', amount: 50, calories: 80, mealTime: '12:30', createdAt: '2026-03-06' },
-  { id: 'm3', petId: '1', foodType: '乾糧', amount: 100, calories: 300, mealTime: '18:00', createdAt: '2026-03-06' },
+const mockServices: Service[] = [
+  { id: 'sv1', name: '女生剪髮', category: 'haircut', price: 800, duration: 60, description: '洗＋剪＋吹整造型' },
+  { id: 'sv2', name: '質感染髮', category: 'coloring', price: 2500, duration: 120, description: '全頭染色＋護色護髮' },
+  { id: 'sv3', name: '深層護髮', category: 'treatment', price: 1200, duration: 45, description: '結構式護髮＋頭皮按摩' },
+  { id: 'sv4', name: '日式美甲', category: 'nails', price: 1000, duration: 90, description: '基礎保養＋光療凝膠' },
+  { id: 'sv5', name: '自然款美睫', category: 'lashes', price: 1500, duration: 75, description: '單根嫁接 100-120 根' },
+  { id: 'sv6', name: '臉部保濕', category: 'facial', price: 1800, duration: 60, description: '深層清潔＋保濕導入＋面膜' },
 ];
 
-const mockMedical: MedicalRecord[] = [
+const mockBookings: Booking[] = [
   {
-    id: 'md1', petId: '1', type: 'vaccine', title: '狂犬病疫苗',
-    description: '年度狂犬病疫苗接種', date: '2026-01-15',
-    nextDueDate: '2027-01-15', veterinarian: '王醫師', createdAt: '2026-01-15',
+    id: 'b1', stylistId: 's1', stylistName: 'Emily Chen', serviceName: '女生剪髮',
+    date: '2026-03-10', time: '14:00', duration: 60, price: 800, status: 'upcoming',
   },
   {
-    id: 'md2', petId: '1', type: 'checkup', title: '年度健檢',
-    description: '血液檢查、X光、心臟超音波', date: '2026-02-10',
-    veterinarian: '李醫師', createdAt: '2026-02-10',
+    id: 'b2', stylistId: 's2', stylistName: 'Sophie Lin', serviceName: '日式美甲',
+    date: '2026-03-15', time: '10:30', duration: 90, price: 1000, status: 'upcoming',
   },
+  {
+    id: 'b3', stylistId: 's4', stylistName: 'Ava Liu', serviceName: '質感染髮',
+    date: '2026-02-20', time: '13:00', duration: 120, price: 2500, status: 'completed',
+    rating: 5,
+  },
+  {
+    id: 'b4', stylistId: 's3', stylistName: 'Mia Wang', serviceName: '自然款美睫',
+    date: '2026-02-05', time: '11:00', duration: 75, price: 1500, status: 'completed',
+    rating: 4,
+  },
+  {
+    id: 'b5', stylistId: 's1', stylistName: 'Emily Chen', serviceName: '深層護髮',
+    date: '2026-01-28', time: '16:00', duration: 45, price: 1200, status: 'cancelled',
+  },
+];
+
+const mockPortfolio: PortfolioItem[] = [
+  { id: 'p1', stylistId: 's1', stylistName: 'Emily Chen', imageUri: '', category: '染髮', caption: '霧感奶茶棕，超顯白！', likes: 86, liked: false },
+  { id: 'p2', stylistId: 's2', stylistName: 'Sophie Lin', imageUri: '', category: '美甲', caption: '春季花卉款光療', likes: 124, liked: true },
+  { id: 'p3', stylistId: 's4', stylistName: 'Ava Liu', imageUri: '', category: '染髮', caption: '漸層蜜桃粉，夢幻感', likes: 203, liked: false },
+  { id: 'p4', stylistId: 's3', stylistName: 'Mia Wang', imageUri: '', category: '美睫', caption: '自然濃密款，素顏也好看', likes: 67, liked: false },
+  { id: 'p5', stylistId: 's1', stylistName: 'Emily Chen', imageUri: '', category: '剪髮', caption: '法式短鮑伯，俐落又時尚', likes: 95, liked: true },
+  { id: 'p6', stylistId: 's4', stylistName: 'Ava Liu', imageUri: '', category: '護髮', caption: '結構式護髮前後對比', likes: 45, liked: false },
+];
+
+// --- Categories ---
+
+export const serviceCategories = [
+  { key: 'all', label: '全部', emoji: '✨' },
+  { key: 'haircut', label: '剪髮', emoji: '✂️' },
+  { key: 'coloring', label: '染髮', emoji: '🎨' },
+  { key: 'treatment', label: '護髮', emoji: '💆' },
+  { key: 'nails', label: '美甲', emoji: '💅' },
+  { key: 'lashes', label: '美睫', emoji: '👁️' },
+  { key: 'facial', label: '保養', emoji: '🧴' },
 ];
 
 // --- Store ---
 
 interface AppState {
-  pets: Pet[];
-  posts: Post[];
-  meals: MealRecord[];
-  medical: MedicalRecord[];
-  activePetId: string;
-  setActivePetId: (id: string) => void;
-  toggleLike: (postId: string) => void;
+  stylists: Stylist[];
+  services: Service[];
+  bookings: Booking[];
+  portfolio: PortfolioItem[];
+  togglePortfolioLike: (id: string) => void;
+  cancelBooking: (id: string) => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
-  const [pets] = useState<Pet[]>(mockPets);
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
-  const [meals] = useState<MealRecord[]>(mockMeals);
-  const [medical] = useState<MedicalRecord[]>(mockMedical);
-  const [activePetId, setActivePetId] = useState('1');
+  const [stylists] = useState<Stylist[]>(mockStylists);
+  const [services] = useState<Service[]>(mockServices);
+  const [bookings, setBookings] = useState<Booking[]>(mockBookings);
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>(mockPortfolio);
 
-  const toggleLike = (postId: string) => {
-    setPosts(prev =>
+  const togglePortfolioLike = (id: string) => {
+    setPortfolio(prev =>
       prev.map(p =>
-        p.id === postId
+        p.id === id
           ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 }
           : p
       )
     );
   };
 
+  const cancelBooking = (id: string) => {
+    setBookings(prev =>
+      prev.map(b => (b.id === id ? { ...b, status: 'cancelled' as const } : b))
+    );
+  };
+
   return (
-    <AppContext.Provider value={{ pets, posts, meals, medical, activePetId, setActivePetId, toggleLike }}>
+    <AppContext.Provider value={{ stylists, services, bookings, portfolio, togglePortfolioLike, cancelBooking }}>
       {children}
     </AppContext.Provider>
   );
